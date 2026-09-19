@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Миссия: Я САМА!</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7b3fe4">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Я САМА!">
+<meta name="format-detection" content="telephone=no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --violet:#7b3fe4; --violet-dk:#5c26bb;
+  --magenta:#e94ecb;
+  --gold:#ffc23c; --gold-dk:#ef8f14;
+  --mint:#23c99d; --mint-dk:#12a37c;
+  --coral:#ff5f7e; --coral-dk:#e03a5c;
+  --ink:#3c2662; --ink-soft:#8878ad;
+  --line:#ece2ff; --app:#fbf6ff;
+  --r-card:22px; --r-panel:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+body{
+  font-family:"Baloo 2",Nunito,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  color:var(--ink);
+  min-height:100svh;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px;
+  background:
+    radial-gradient(120% 90% at 12% 0%, #a06aff 0%, transparent 60%),
+    radial-gradient(120% 90% at 90% 100%, #ff86d0 0%, transparent 58%),
+    linear-gradient(160deg,#4a2288 0%,#6b3ac0 50%,#8b57d6 100%);
+}
+
+.tablet{
+  width:min(1180px,100%);
+  height:min(820px,calc(100svh - 28px));
+  background:linear-gradient(180deg,#2a1250,#160a2e);
+  border-radius:38px;padding:12px;
+  box-shadow:0 40px 80px rgba(20,4,50,.55), inset 0 2px 0 rgba(255,255,255,.18);
+  display:flex;
+}
+.screen{
+  flex:1 1 auto;min-width:0;
+  background:var(--app);border-radius:27px;overflow:hidden;
+  display:flex;flex-direction:column;position:relative;
+}
+
+/* ── шапка ── */
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:12px;
+  padding:12px 16px;
+  background:linear-gradient(180deg,#ffffff,#f6edff);
+  border-bottom:2px solid var(--line);
+  position:relative;z-index:5;
+}
+.hero-chip{display:flex;align-items:center;gap:11px;flex:0 0 auto}
+.avatar{
+  width:52px;height:52px;border-radius:50%;flex:0 0 auto;position:relative;
+  background:linear-gradient(160deg,#ffd9ef,#c9a4ff);
+  border:3px solid #fff;
+  box-shadow:0 4px 0 rgba(123,63,228,.25),0 8px 18px rgba(123,63,228,.25);
+}
+.avatar svg{width:100%;height:100%;border-radius:50%;display:block}
+.lvl{
+  position:absolute;left:-6px;bottom:-6px;
+  min-width:25px;height:25px;padding:0 5px;border-radius:13px;
+  background:linear-gradient(180deg,var(--violet),var(--violet-dk));
+  color:#fff;font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  border:3px solid #fff;box-shadow:0 3px 8px rgba(92,38,187,.4);
+}
+.hero-meta{min-width:0}
+.hero-name{font-size:14px;font-weight:800;line-height:1.1}
+.hero-rank{font-size:11px;font-weight:800;color:var(--ink-soft);margin-top:1px}
+.xp{width:120px;height:10px;border-radius:99px;margin-top:5px;background:#eadcff;
+    box-shadow:inset 0 2px 4px rgba(76,32,140,.18);overflow:hidden}
+.xp i{display:block;height:100%;border-radius:99px;
+  background:linear-gradient(180deg,#ffe08a,var(--gold) 55%,var(--gold-dk));
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6);transition:width .5s cubic-bezier(.2,.9,.3,1)}
+
+.purse{
+  flex:0 0 auto;align-self:center;
+  display:inline-flex;align-items:center;gap:7px;
+  height:44px;padding:0 16px 0 10px;border-radius:99px;
+  background:linear-gradient(180deg,#ffe9a8,#ffc23c);
+  border:3px solid #c9750a;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.7),inset 0 -5px 0 rgba(0,0,0,.12),
+             0 5px 0 #a85c04,0 10px 18px rgba(239,143,20,.3);
+  font-size:21px;font-weight:800;color:#6d3600;line-height:1;white-space:nowrap;
+  text-shadow:0 2px 0 rgba(255,255,255,.5);
+}
+.purse.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{50%{transform:scale(1.14) rotate(-2deg)}}
+
+.brand{flex:0 1 auto;min-width:0;margin:0 auto;text-align:center;line-height:.92;user-select:none;white-space:nowrap;overflow:hidden}
+.brand b{display:block;font-size:14px;font-weight:900;font-style:italic;letter-spacing:.5px;color:var(--magenta)}
+.brand span{
+  display:block;font-size:28px;font-weight:800;font-style:italic;letter-spacing:-.5px;
+  background:linear-gradient(180deg,#a86bff,#7b3fe4 55%,#e94ecb);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 4px 6px rgba(123,63,228,.35));
+}
+
+.nav{display:flex;gap:8px;flex:0 0 auto}
+.nav button{
+  position:relative;width:48px;height:48px;flex:0 0 auto;cursor:pointer;
+  border:3px solid #c4ade8;border-radius:16px;
+  background:linear-gradient(180deg,#ffffff,#eee2ff);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.9),inset 0 -5px 0 rgba(92,38,187,.08),
+             0 5px 0 #c4ade8,0 9px 14px rgba(92,38,187,.18);
+  font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;
+  transition:transform .1s,box-shadow .1s;
+}
+.nav button:active{transform:translateY(5px);box-shadow:inset 0 2px 0 rgba(255,255,255,.7),0 0 0 #c4ade8}
+.nav button[aria-current="page"]{
+  border-color:#4e1ea8;
+  background:linear-gradient(180deg,#b98bff,#7b3fe4);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.5),inset 0 -5px 0 rgba(0,0,0,.15),
+             0 5px 0 #4e1ea8,0 10px 20px rgba(123,63,228,.45);
+}
+.nav button:focus-visible,.btn:focus-visible{outline:3px solid var(--magenta);outline-offset:3px}
+
+/* ── рабочая область ── */
+.stage{
+  flex:1 1 auto;min-height:0;display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:14px;padding:14px;
+}
+
+.scene{
+  position:relative;border-radius:var(--r-panel);overflow:hidden;
+  background:linear-gradient(180deg,#fbf4ff,#f6ecff);
+  border:3px solid #fff;
+  box-shadow:0 10px 26px rgba(92,38,187,.18);
+  display:flex;flex-direction:column;min-width:0;
+}
+.scene-svg{flex:1 1 auto;width:100%;height:100%;min-height:0;display:block}
+.scene-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.avatar>img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.acc{
+  position:absolute;z-index:3;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;
+  filter:drop-shadow(0 2px 3px rgba(92,38,187,.4));
+}
+.acc img{width:100%;height:auto;display:block}
+.pick{display:none}
+.scene-tag{
+  position:absolute;left:16px;top:14px;z-index:2;
+  padding:9px 16px;border-radius:99px;
+  background:rgba(255,255,255,.88);
+  border:2px solid #fff;box-shadow:0 6px 14px rgba(92,38,187,.2);
+  font-size:15px;font-weight:800;
+}
+.scene-say{
+  position:absolute;right:14px;top:12px;z-index:2;max-width:50%;
+  padding:12px 16px;border-radius:20px 20px 20px 6px;
+  background:#fff;border:2px solid var(--line);
+  box-shadow:0 8px 18px rgba(92,38,187,.18);
+  font-size:14px;font-weight:800;line-height:1.35;
+}
+
+.panel{
+  border-radius:var(--r-panel);
+  background:linear-gradient(180deg,#ffffff,#faf4ff);
+  border:3px solid #fff;
+  box-shadow:0 10px 26px rgba(92,38,187,.18);
+  display:flex;flex-direction:column;min-height:0;min-width:0;
+}
+.panel-head{flex:0 0 auto;padding:14px 18px 10px;display:flex;align-items:center;gap:10px}
+.panel-head h1{font-size:23px;font-weight:800;letter-spacing:-.3px}
+.panel-head p{font-size:13px;font-weight:800;color:var(--ink-soft);margin-left:auto;text-align:right}
+.panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:4px 16px 18px}
+.panel-body::-webkit-scrollbar{width:8px}
+.panel-body::-webkit-scrollbar-thumb{background:#e2d3ff;border-radius:99px}
+.sub-title{font-size:17px;font-weight:800;margin:2px 0 9px}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+
+.card{
+  position:relative;background:#fff;border:2px solid var(--line);
+  border-radius:var(--r-card);padding:12px;text-align:center;
+  display:flex;flex-direction:column;gap:9px;
+  box-shadow:0 5px 0 #efe6ff,0 10px 20px rgba(92,38,187,.10);
+}
+.card.done{opacity:.62}
+.card.locked{opacity:.72}
+.card.locked .thumb{filter:grayscale(.75)}
+.streak{
+  position:absolute;right:8px;top:8px;z-index:2;
+  padding:3px 9px;border-radius:999px;
+  background:linear-gradient(180deg,#ffd9a8,#ff9f43);
+  border:2px solid #fff;box-shadow:0 3px 8px rgba(200,90,10,.28);
+  font-size:12px;font-weight:800;color:#6d3600;white-space:nowrap;
+}
+.thumb{
+  height:100px;border-radius:16px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;font-size:50px;
+  background:linear-gradient(180deg,#f6efff,#ffeaf7);
+}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.card h2{font-size:15px;font-weight:800;line-height:1.2}
+.price{
+  display:inline-flex;align-items:center;gap:5px;align-self:center;
+  padding:4px 12px;border-radius:99px;font-size:15px;font-weight:800;color:#7a3d00;
+  background:linear-gradient(180deg,#fff2cd,#ffd980);border:2px solid #fff;
+}
+.btn{
+  position:relative;width:100%;margin-top:auto;cursor:pointer;
+  --c1:#b98bff; --c2:#7b3fe4; --c3:#4e1ea8;
+  border:3px solid var(--c3);border-radius:18px;
+  padding:12px 14px 13px;
+  font-family:inherit;font-size:15px;font-weight:800;letter-spacing:.2px;
+  color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.28);
+  background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 58%,var(--c2) 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255,255,255,.55),
+    inset 0 -6px 0 rgba(0,0,0,.14),
+    0 6px 0 var(--c3),
+    0 10px 18px rgba(60,20,120,.28);
+  transition:transform .1s,box-shadow .1s,filter .15s;
+}
+.btn::after{
+  content:"";position:absolute;left:3px;right:3px;top:0;height:48%;
+  border-radius:14px 14px 40px 40px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{
+  transform:translateY(6px);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.4),inset 0 -3px 0 rgba(0,0,0,.14),0 0 0 var(--c3);
+}
+.btn.mint{--c1:#7cf0cf;--c2:#23c99d;--c3:#0c8465}
+.btn.gold{--c1:#ffe6a3;--c2:#ffbe2e;--c3:#c9750a;color:#6d3600;text-shadow:0 2px 0 rgba(255,255,255,.45)}
+.btn.coral{--c1:#ffa8ba;--c2:#ff5f7e;--c3:#c02845}
+.btn.ghost{--c1:#ffffff;--c2:#efe4ff;--c3:#bda4e6;color:var(--ink);text-shadow:0 2px 0 rgba(255,255,255,.7)}
+.btn[disabled]{--c1:#e2d9f2;--c2:#c7bbdd;--c3:#a294c0;cursor:default;color:#fff;filter:saturate(.5)}
+.btn[disabled]:active{transform:none;box-shadow:inset 0 3px 0 rgba(255,255,255,.5),inset 0 -6px 0 rgba(0,0,0,.1),0 6px 0 var(--c3)}
+
+.ribbon{
+  position:absolute;top:10px;right:-6px;z-index:2;
+  padding:4px 10px;border-radius:8px 4px 4px 8px;
+  font-size:11px;font-weight:800;color:#fff;
+  background:linear-gradient(180deg,#ffb03c,var(--gold-dk));
+  box-shadow:0 3px 8px rgba(239,143,20,.4);
+}
+.ribbon.mint{background:linear-gradient(180deg,#4ee0b6,var(--mint-dk))}
+
+.add{border:3px dashed #c9a8ff;background:linear-gradient(180deg,#faf3ff,#f3e7ff);
+  align-items:center;justify-content:center;cursor:pointer;min-height:180px;box-shadow:none}
+.add .plus{font-size:44px;font-weight:800;color:var(--violet);line-height:1}
+
+.empty{grid-column:1/-1;text-align:center;padding:34px 18px;
+  border-radius:var(--r-card);border:2px dashed #dcc9ff;background:#fbf5ff}
+.empty .big{font-size:44px}
+.empty h2{font-size:17px;font-weight:800;margin:8px 0 4px}
+.empty p{font-size:13px;font-weight:700;color:var(--ink-soft)}
+
+.badges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.badge{display:flex;gap:12px;align-items:center;text-align:left;
+  background:#fff;border:2px solid var(--line);border-radius:var(--r-card);padding:12px;
+  box-shadow:0 5px 0 #efe6ff}
+.badge .medal{width:54px;height:54px;flex:0 0 auto;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:27px;
+  background:linear-gradient(180deg,#efe6ff,#ded0f7);filter:grayscale(1);opacity:.55}
+.badge.on .medal{background:linear-gradient(180deg,#ffe08a,var(--gold));filter:none;opacity:1;
+  box-shadow:0 4px 0 var(--gold-dk),0 0 22px rgba(255,194,60,.6)}
+.badge h3{font-size:14px;font-weight:800}
+.badge p{font-size:12px;font-weight:700;color:var(--ink-soft);margin-top:2px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#fff;border:2px solid var(--line);border-radius:18px;padding:12px 6px;text-align:center;
+  box-shadow:0 5px 0 #efe6ff}
+.stat b{display:block;font-size:24px;font-weight:800;line-height:1}
+.stat span{font-size:11px;font-weight:800;color:var(--ink-soft)}
+
+.goal{background:linear-gradient(135deg,#7b3fe4,#e94ecb);color:#fff;
+  border-radius:var(--r-card);padding:16px;margin-bottom:14px;
+  box-shadow:0 8px 20px rgba(123,63,228,.35)}
+.goal.calm{background:linear-gradient(135deg,#23c99d,#1a9ecf);box-shadow:0 8px 20px rgba(26,158,207,.3)}
+.goal h3{font-size:17px;font-weight:800}
+.goal p{font-size:13px;font-weight:800;opacity:.92;margin-top:4px}
+.goal .bar{height:12px;border-radius:99px;background:rgba(255,255,255,.28);margin-top:12px;overflow:hidden}
+.goal .bar i{display:block;height:100%;background:linear-gradient(180deg,#fff3c9,var(--gold));border-radius:99px;transition:width .5s}
+
+.line{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid var(--line);
+  border-radius:16px;padding:10px 12px;margin-bottom:9px;box-shadow:0 4px 0 #efe6ff}
+.line .ic{font-size:25px;flex:0 0 auto}
+.line b{font-size:14px;font-weight:800}
+.line small{display:block;font-size:12px;font-weight:800;color:var(--ink-soft)}
+.line .tail{margin-left:auto;font-size:15px;font-weight:800;color:var(--gold-dk);white-space:nowrap}
+.kill{border:none;background:#ffe9ee;color:var(--coral-dk);margin-left:8px;
+  width:34px;height:34px;border-radius:12px;font-size:17px;cursor:pointer;font-weight:800;flex:0 0 auto}
+.divider{height:2px;background:var(--line);border-radius:2px;margin:14px 0}
+
+.sheet{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  padding:20px;background:rgba(40,14,80,.5)}
+.sheet.open{display:flex}
+.sheet-box{width:min(440px,100%);max-height:100%;overflow-y:auto;
+  background:var(--app);border-radius:28px;padding:20px;
+  border:3px solid #fff;box-shadow:0 30px 60px rgba(30,8,70,.45);
+  display:flex;flex-direction:column;gap:11px;animation:rise .28s cubic-bezier(.2,1.1,.4,1)}
+@keyframes rise{from{transform:translateY(24px) scale(.96);opacity:0}}
+.sheet-box h2{font-size:21px;font-weight:800}
+.sheet-box label{font-size:12px;font-weight:900;color:var(--ink-soft);margin-bottom:-5px}
+.sheet-box input,.sheet-box select{font-family:inherit;font-size:16px;font-weight:800;color:var(--ink);
+  padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;width:100%}
+.sheet-box input:focus,.sheet-box select:focus{outline:none;border-color:var(--violet)}
+.sheet-box select{
+  -webkit-appearance:none;appearance:none;cursor:pointer;
+  padding-right:40px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--violet) 50%),
+                   linear-gradient(135deg,var(--violet) 50%,transparent 50%);
+  background-position:calc(100% - 22px) 22px,calc(100% - 15px) 22px;
+  background-size:7px 7px,7px 7px;background-repeat:no-repeat;
+}
+.sheet-box select option{font-weight:700}
+.hint{font-size:12px;font-weight:700;color:var(--ink-soft);line-height:1.45}
+.vrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.vrow>span{flex:0 0 86px;font-size:12px;font-weight:900;color:var(--ink-soft)}
+.vrow select{flex:1 1 auto;min-width:0;font-family:inherit;font-size:14px;font-weight:800;color:var(--ink);
+  padding:9px 12px;border-radius:12px;border:2px solid var(--line);background:#fff}
+.vrow input[type=range]{flex:1 1 auto;min-width:0;accent-color:var(--violet);height:24px}
+
+.toast{position:absolute;left:50%;bottom:26px;transform:translate(-50%,26px);
+  z-index:80;opacity:0;pointer-events:none;max-width:80%;text-align:center;
+  padding:13px 22px;border-radius:99px;
+  background:linear-gradient(180deg,#5c26bb,#3c1580);color:#fff;
+  font-size:15px;font-weight:800;box-shadow:0 14px 30px rgba(30,8,70,.45);
+  transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.det-thumb{width:100%;aspect-ratio:16/10;border-radius:18px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;font-size:64px;
+  background:linear-gradient(180deg,#f6efff,#ffeaf7);border:2px solid var(--line)}
+.det-thumb img{width:100%;height:100%;object-fit:cover}
+.det-desc{font-size:15px;font-weight:500;color:#5b4a7d;line-height:1.5}
+.det-meta{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.det-meta .btn{width:auto;margin:0;flex:1 1 auto}
+.tap{cursor:pointer}
+.spark{position:absolute;z-index:70;pointer-events:none;font-size:26px;animation:fly .9s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ── телефон / узкий экран ── */
+@media (max-width:900px){
+  body{padding:0;display:block}
+  .tablet{width:100%;height:100svh;border-radius:0;padding:0;box-shadow:none}
+  /* вырез камеры сверху и полоса жестов снизу на iPhone */
+  .topbar{padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .stage{padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .sheet-box{padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+  .screen{border-radius:0}
+  .topbar{gap:10px;padding:10px 12px}
+  .hero-chip{order:1}
+  .purse{order:2;margin-left:auto;height:40px;font-size:19px;padding:0 14px 0 9px}
+  .brand{order:3;flex:0 0 100%;margin:0;text-align:left}
+  .brand b{display:inline;font-size:12px}
+  .brand span{display:inline;font-size:20px;margin-left:6px}
+  .nav{order:4;width:100%;justify-content:space-between;gap:6px}
+  .nav button{flex:1 1 0;width:auto;height:44px;font-size:20px;border-radius:14px}
+  .xp{width:110px}
+  .stage{display:block;padding:10px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .scene{margin-bottom:10px}
+  .scene-svg{flex:none;height:auto;aspect-ratio:520/400}
+  .panel-body{overflow:visible}
+  .scene-say{display:none}
+  .grid,.badges{grid-template-columns:1fr}
+  .thumb{height:96px}
+}
+@media (max-width:360px){
+  .hero-name,.hero-rank{font-size:11px}
+  .avatar{width:46px;height:46px}
+  .xp{width:92px}
+  .nav button{height:40px;font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="tablet">
+<div class="screen">
+
+  <header class="topbar">
+    <div class="hero-chip">
+      <div class="avatar" id="avatarBox">
+        <svg viewBox="0 0 60 60" aria-hidden="true" id="avatarSvg">
+          <defs><clipPath id="avclip"><circle cx="30" cy="30" r="30"/></clipPath></defs>
+          <g clip-path="url(#avclip)">
+            <rect width="60" height="60" fill="#ffd9ef"/>
+            <path d="M12 60c0-13 8-20 18-20s18 7 18 20z" fill="#8f5bff"/>
+            <path d="M13 30c0-13 7-20 17-20s17 7 17 20c0 8-2 13-4 15H17c-2-2-4-7-4-15z" fill="#c98f4a"/>
+            <ellipse cx="30" cy="31" rx="13" ry="15" fill="#ffdcc2"/>
+            <path d="M15 26c1-12 8-17 15-17s14 5 15 17c-4-6-8-8-15-8s-11 2-15 8z" fill="#b8763a"/>
+            <circle cx="25" cy="31" r="2.6" fill="#3c2662"/><circle cx="35" cy="31" r="2.6" fill="#3c2662"/>
+            <circle cx="25.9" cy="30.1" r=".9" fill="#fff"/><circle cx="35.9" cy="30.1" r=".9" fill="#fff"/>
+            <path d="M26 38q4 4 8 0" stroke="#c25f6e" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <div class="lvl" id="lvlBadge">1</div>
+        <div class="acc" id="accBadge" hidden></div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-name">Ксюша</div>
+        <div class="hero-rank" id="rankName">Новичок</div>
+        <div class="xp"><i id="xpFill" style="width:0%"></i></div>
+      </div>
+    </div>
+
+    <div class="purse" id="purse"><span>⭐</span><span id="starCount">0</span></div>
+
+    <div class="brand"><b>Миссия:</b><span>Я САМА!</span></div>
+
+    <nav class="nav" aria-label="Разделы">
+      <button data-go="home" aria-current="page" title="Комната">🏠</button>
+      <button data-go="tasks" title="Задания">📋</button>
+      <button data-go="shop" title="Магазин наград">🎁</button>
+      <button data-go="wear" title="Гардероб">👗</button>
+      <button data-go="awards" title="Достижения">🏆</button>
+      <button data-go="parent" title="Родителям">⚙️</button>
+      <button id="voiceBtn" title="Голос">🔊</button>
+    </nav>
+  </header>
+
+  <div class="stage">
+
+    <section class="scene">
+      <img class="scene-photo" id="roomPhoto" alt="" hidden>
+      <div class="scene-tag" id="sceneTag">Моя комната</div>
+      <div class="scene-say" id="sceneSay">Я сегодня всё сделаю сама!</div>
+      <svg class="scene-svg" viewBox="0 -170 520 550" preserveAspectRatio="xMidYMax slice" aria-label="Комната девочки">
+        <defs>
+          <linearGradient id="gWall" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fbf4ff"/><stop offset="1" stop-color="#ecdcff"/>
+          </linearGradient>
+          <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8fd0ff"/><stop offset="1" stop-color="#ffd3ec"/>
+          </linearGradient>
+          <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#e6cdb0"/><stop offset="1" stop-color="#d3b294"/>
+          </linearGradient>
+          <linearGradient id="gHood" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#a877ff"/><stop offset="1" stop-color="#7b3fe4"/>
+          </linearGradient>
+          <linearGradient id="gHair" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#e0ad6a"/><stop offset="1" stop-color="#b8763a"/>
+          </linearGradient>
+          <linearGradient id="gQuilt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff3fa"/><stop offset="1" stop-color="#ffdcef"/>
+          </linearGradient>
+        </defs>
+
+        <rect x="0" y="-170" width="520" height="460" fill="url(#gWall)"/>
+        <g fill="#e0c8ff" opacity=".7">
+          <circle cx="80" cy="-120" r="3"/><circle cx="180" cy="-60" r="2.4"/><circle cx="300" cy="-130" r="2.8"/>
+          <circle cx="420" cy="-70" r="2.4"/><circle cx="250" cy="-20" r="2.2"/><circle cx="470" cy="-140" r="3"/>
+        </g>
+        <g>
+          <path d="M20 -110q240 70 480 0" stroke="#d9c2ff" stroke-width="3" fill="none"/>
+          <g fill="#ffb3c4"><path d="M96 -92l-9-16h18z"/><path d="M216 -78l-9-16h18z"/><path d="M336 -78l-9-16h18z"/><path d="M456 -92l-9-16h18z"/></g>
+          <g fill="#ffd873"><path d="M156 -86l-9-16h18z"/><path d="M276 -74l-9-16h18z"/><path d="M396 -86l-9-16h18z"/></g>
+        </g>
+        <rect y="286" width="520" height="94" fill="url(#gFloor)"/>
+        <rect y="278" width="520" height="12" fill="#fff6ec"/>
+        <g fill="#e0c8ff" opacity=".8">
+          <circle cx="60" cy="60" r="3"/><circle cx="120" cy="34" r="2"/><circle cx="176" cy="72" r="2.6"/>
+          <circle cx="96" cy="120" r="2.2"/><circle cx="40" cy="168" r="2.6"/><circle cx="150" cy="140" r="2"/>
+          <circle cx="212" cy="40" r="2.4"/><circle cx="252" cy="96" r="2"/>
+        </g>
+
+        <g>
+          <rect x="352" y="42" width="126" height="132" rx="14" fill="url(#gSky)"/>
+          <circle cx="446" cy="78" r="15" fill="#fff6c2" opacity=".9"/>
+          <path d="M352 150q30-26 62-6t64-14v44H352z" fill="#9ad9a6" opacity=".85"/>
+          <rect x="352" y="42" width="126" height="132" rx="14" fill="none" stroke="#fff" stroke-width="9"/>
+          <path d="M415 46v124M356 108h118" stroke="#fff" stroke-width="7"/>
+          <rect x="336" y="34" width="158" height="12" rx="4" fill="#fff"/>
+          <path d="M338 40q22 60 0 120h-16V40z" fill="#ffc7e4"/>
+          <path d="M492 40q-22 60 0 120h16V40z" fill="#ffc7e4"/>
+        </g>
+
+        <g>
+          <circle cx="266" cy="8" r="27" fill="#fff" stroke="#e6d4f7" stroke-width="4"/>
+          <circle cx="266" cy="8" r="2.5" fill="#7b3fe4"/>
+          <path d="M266 8v-14M266 8l10 6" stroke="#7b3fe4" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <g>
+            <rect x="76" y="-34" width="52" height="46" rx="6" fill="#fff" stroke="#f0d9c2" stroke-width="4" transform="rotate(-5 102 -11)"/>
+            <circle cx="102" cy="-11" r="12" fill="#ffd6e8" transform="rotate(-5 102 -11)"/>
+            <rect x="140" y="-14" width="44" height="40" rx="6" fill="#fff" stroke="#f0d9c2" stroke-width="4" transform="rotate(4 162 6)"/>
+            <path d="M148 20l10-14 8 9 6-6 10 11z" fill="#a8dcb4" transform="rotate(4 162 6)"/>
+          </g>
+          <g>
+            <path d="M420 -46h44l-8 26h-28z" fill="#e8b98a"/>
+            <path d="M442 -46v-24" stroke="#d9c2ff" stroke-width="3"/>
+            <path d="M432 -22q-16 26-4 44M452 -22q16 26 4 44M442 -22v46" stroke="#7fc48e" stroke-width="5" fill="none" stroke-linecap="round"/>
+          </g>
+          <rect x="60" y="112" width="150" height="10" rx="5" fill="#f3d9bb"/>
+          <circle cx="96" cy="96" r="15" fill="#d9a86e"/>
+          <circle cx="86" cy="84" r="6" fill="#c99154"/><circle cx="106" cy="84" r="6" fill="#c99154"/>
+          <ellipse cx="96" cy="100" rx="7" ry="5" fill="#f6e2c8"/>
+          <circle cx="91" cy="94" r="1.8" fill="#4a2a12"/><circle cx="101" cy="94" r="1.8" fill="#4a2a12"/>
+          <ellipse cx="140" cy="99" rx="12" ry="13" fill="#fff"/>
+          <ellipse cx="133" cy="80" rx="4.5" ry="12" fill="#fff"/><ellipse cx="147" cy="80" rx="4.5" ry="12" fill="#fff"/>
+          <ellipse cx="133" cy="82" rx="2" ry="8" fill="#ffc7e4"/><ellipse cx="147" cy="82" rx="2" ry="8" fill="#ffc7e4"/>
+          <circle cx="136" cy="97" r="1.8" fill="#4a2a12"/><circle cx="144" cy="97" r="1.8" fill="#4a2a12"/>
+          <rect x="172" y="86" width="10" height="26" rx="2" fill="#7b3fe4"/>
+          <rect x="184" y="92" width="10" height="20" rx="2" fill="#23c99d"/>
+          <rect x="196" y="82" width="10" height="30" rx="2" fill="#ff5f7e"/>
+        </g>
+
+        <g>
+          <rect x="246" y="96" width="62" height="58" rx="8" fill="#fff" stroke="#f0d9c2" stroke-width="4"/>
+          <path d="M256 142l14-18 10 12 8-9 12 15z" fill="#a8dcb4"/>
+          <circle cx="290" cy="114" r="6" fill="#ffd873"/>
+        </g>
+
+        <g>
+          <rect x="176" y="176" width="188" height="18" rx="9" fill="#e3b98c"/>
+          <rect x="182" y="188" width="176" height="86" rx="12" fill="#f6e3cd"/>
+          <rect x="188" y="196" width="164" height="70" rx="10" fill="url(#gQuilt)"/>
+          <rect x="196" y="200" width="58" height="34" rx="10" fill="#fff"/>
+          <rect x="200" y="204" width="50" height="26" rx="8" fill="#ffeef7"/>
+          <rect x="188" y="238" width="164" height="28" rx="8" fill="#ffc7e4"/>
+          <g fill="#fff" opacity=".8">
+            <circle cx="220" cy="252" r="3"/><circle cx="256" cy="248" r="2.5"/>
+            <circle cx="292" cy="254" r="3"/><circle cx="326" cy="248" r="2.5"/>
+          </g>
+          <rect x="170" y="164" width="16" height="112" rx="8" fill="#e3b98c"/>
+          <rect x="356" y="196" width="14" height="80" rx="7" fill="#e3b98c"/>
+        </g>
+
+        <g>
+          <rect x="384" y="212" width="72" height="66" rx="10" fill="#eec9a3"/>
+          <rect x="392" y="226" width="56" height="18" rx="6" fill="#fff3e4"/>
+          <rect x="392" y="250" width="56" height="18" rx="6" fill="#fff3e4"/>
+          <circle cx="430" cy="204" r="26" fill="#fff6c2" opacity=".35"/>
+          <path d="M404 210l16-30h20l16 30z" fill="#ffd873"/>
+          <rect x="416" y="176" width="28" height="8" rx="4" fill="#ffe9a8"/>
+        </g>
+
+        <ellipse cx="250" cy="332" rx="140" ry="34" fill="#ffc7e4" opacity=".7"/>
+        <ellipse cx="250" cy="332" rx="98" ry="22" fill="#ffe6f3"/>
+
+        <g>
+          <path d="M96 380v-64c0-32 24-52 54-52s54 20 54 52v64z" fill="url(#gHood)"/>
+          <path d="M120 262q30 26 60 0l8 12q-38 30-76 0z" fill="#9a6bff"/>
+          <path d="M118 336h64c6 0 6 18 0 18h-64c-6 0-6-18 0-18z" fill="#6f2fd6" opacity=".35"/>
+          <rect x="134" y="278" width="7" height="36" rx="3.5" fill="#fff" opacity=".92"/>
+          <rect x="158" y="278" width="7" height="36" rx="3.5" fill="#fff" opacity=".92"/>
+          <circle cx="137.5" cy="316" r="4" fill="#fff" opacity=".92"/>
+          <circle cx="161.5" cy="316" r="4" fill="#fff" opacity=".92"/>
+          <path d="M190 276c22 8 34 28 34 50l-36 6z" fill="#6f2fd6"/>
+          <path d="M190 320l34-4 3 12-34 5z" fill="#8f5bff"/>
+          <circle cx="210" cy="344" r="16" fill="#ffdcc2"/>
+          <path d="M200 340q10 6 20 0" stroke="#eab08c" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M100 214c0-46 20-70 46-70s46 24 46 70c0 42-2 72-8 100q-13 12-24 0q-11 12-22 0q-12 12-24 0c-6-28-8-58-8-100z" fill="url(#gHair)"/>
+          <rect x="132" y="232" width="28" height="34" fill="#f0b894"/>
+          <ellipse cx="108" cy="216" rx="7" ry="10" fill="#ffdcc2"/>
+          <ellipse cx="184" cy="216" rx="7" ry="10" fill="#ffdcc2"/>
+          <ellipse cx="146" cy="210" rx="38" ry="42" fill="#ffdcc2"/>
+          <path d="M108 202c3-40 18-56 38-56s35 16 38 56c-9-21-21-28-38-28s-29 7-38 28z" fill="#c98f4a"/>
+          <path d="M170 152c12 8 16 26 14 44-3-16-7-30-14-44z" fill="#b8763a"/>
+          <path d="M120 158c-8 8-11 24-10 40 4-15 8-28 10-40z" fill="#e0ad6a"/>
+          <ellipse cx="131" cy="214" rx="9" ry="10" fill="#fff"/>
+          <ellipse cx="161" cy="214" rx="9" ry="10" fill="#fff"/>
+          <circle cx="131.5" cy="215" r="6.2" fill="#6b8fbf"/>
+          <circle cx="161.5" cy="215" r="6.2" fill="#6b8fbf"/>
+          <circle cx="131.5" cy="215" r="3.2" fill="#2b2038"/>
+          <circle cx="161.5" cy="215" r="3.2" fill="#2b2038"/>
+          <circle cx="134" cy="212" r="2.3" fill="#fff"/>
+          <circle cx="164" cy="212" r="2.3" fill="#fff"/>
+          <path d="M121 199q11-7 20-1M152 198q9-6 20 1" stroke="#8a5a2c" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+          <path d="M147 220q4 5-1 6" stroke="#eab08c" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M133 233q13 15 26 0q-13 8-26 0z" fill="#c2465f"/>
+          <path d="M133 233q13 15 26 0" stroke="#a83a52" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="117" cy="228" rx="8" ry="5" fill="#ffb3c4" opacity=".6"/>
+          <ellipse cx="175" cy="228" rx="8" ry="5" fill="#ffb3c4" opacity=".6"/>
+          <path d="M178 172c4-6 12-2 8 5l-8 9-8-9c-4-7 4-11 8-5z" fill="#ff5f7e"/>
+          <path d="M114 278c-22 8-34 26-34 48l36 6z" fill="#6f2fd6"/>
+          <path d="M80 322l36 6-2 12-36-6z" fill="#8f5bff"/>
+          <circle cx="94" cy="342" r="17" fill="#ffdcc2"/>
+          <rect x="86" y="296" width="15" height="44" rx="7.5" fill="#ffdcc2"/>
+          <path d="M87 306q7-11 12-1" stroke="#eab08c" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M84 340h20M86 348h17" stroke="#eab08c" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <g>
+          <ellipse cx="274" cy="370" rx="34" ry="8" fill="#c9a184" opacity=".3"/>
+          <path d="M300 356q26 8 18-20" stroke="#b9b1a9" stroke-width="11" fill="none" stroke-linecap="round"/>
+          <path d="M248 368c0-30 11-48 26-48s26 18 26 48z" fill="#b9b1a9"/>
+          <path d="M256 368c0-20 7-32 18-32s18 12 18 32z" fill="#e9e3db"/>
+          <ellipse cx="258" cy="364" rx="9" ry="5" fill="#e9e3db"/>
+          <ellipse cx="290" cy="364" rx="9" ry="5" fill="#e9e3db"/>
+          <path d="M256 306l-4-18 17 10zM292 306l4-18-17 10z" fill="#c6bfb6"/>
+          <path d="M258 304l-2-9 9 5zM290 304l2-9-9 5z" fill="#ffb3c4"/>
+          <circle cx="274" cy="318" r="22" fill="#c6bfb6"/>
+          <path d="M266 300q8-5 16 0M262 306q6-4 11-2M286 306q-6-4-11-2" stroke="#a49c94" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="265" cy="317" rx="5.5" ry="6.5" fill="#fff"/>
+          <ellipse cx="283" cy="317" rx="5.5" ry="6.5" fill="#fff"/>
+          <circle cx="265" cy="318" r="3.8" fill="#4f7a52"/>
+          <circle cx="283" cy="318" r="3.8" fill="#4f7a52"/>
+          <circle cx="265" cy="318" r="1.9" fill="#2b2038"/>
+          <circle cx="283" cy="318" r="1.9" fill="#2b2038"/>
+          <circle cx="266.4" cy="316" r="1.3" fill="#fff"/>
+          <circle cx="284.4" cy="316" r="1.3" fill="#fff"/>
+          <path d="M270 329h8l-4 4.5z" fill="#ff8fae"/>
+          <path d="M274 334q-4 4-8 1M274 334q4 4 8 1" stroke="#8a8078" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M252 324l-16-4M252 331l-15 5M296 324l16-4M296 331l15 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h1 id="pageTitle">Комната</h1>
+        <p id="pageNote"></p>
+      </div>
+      <div class="panel-body" id="pageBody"></div>
+    </section>
+  </div>
+
+  <div class="sheet" id="sheet"><div class="sheet-box" id="sheetBox"></div></div>
+  <input type="file" id="filePick" class="pick" accept="image/*">
+  <div class="toast" id="toast"></div>
+</div>
+</div>
+
+<script>
+var Store=(function(){
+  var mem={},ok=true;
+  try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){ok=false}
+  return{
+    get:function(k,d){try{var v=ok?localStorage.getItem(k):mem[k];return v==null?d:JSON.parse(v)}catch(e){return d}},
+    set:function(k,v){var s=JSON.stringify(v);if(ok){try{localStorage.setItem(k,s)}catch(e){mem[k]=s}}else{mem[k]=s}},
+    wipe:function(){if(ok){try{localStorage.clear()}catch(e){}}mem={}}
+  };
+})();
+
+var SEED_TASKS=[
+  {t:'Заправить кровать',v:20,i:'🛏️',p:'img/task-bed.jpg',d:'Расправь простыню, чтобы не было складок, положи подушку ровно и накрой кровать покрывалом.'},
+  {t:'Почистить зубы',v:10,i:'🪥',p:'img/task-teeth.jpg',d:'Выдави пасты размером с горошину. Верхние зубы чисти сверху вниз, нижние — снизу вверх. Две минуты.'},
+  {t:'Убрать игрушки',v:25,i:'🧸',p:'img/task-toys.jpg',d:'Мягкие игрушки — в корзину, конструктор — в коробку. На полу не должно остаться ничего лишнего.'},
+  {t:'Сделать уроки',v:50,i:'📚',p:'img/task-homework.jpg',d:'Достань тетрадь, напиши число, реши задания. Если что-то непонятно — спроси, это не считается за подсказку.'},
+  {t:'Покормить кота',v:15,i:'🐱',p:'img/task-cat.jpg',d:'Насыпь корм в миску и обязательно проверь, есть ли свежая вода.'},
+  {t:'Полить цветы',v:15,i:'🪴',p:'img/task-plants.jpg',d:'Полей тёплой водой под корень, на листья лить не надо. Земля должна стать влажной, но не мокрой.'}
+];
+/* n — сколько дней подряд нужно закрыть ВСЕ дела, чтобы награда открылась.
+   Маленькие ежедневные радости идут с n:0 и серию не тратят. */
+var SEED_REWARDS=[
+  {t:'Погулять во дворе',v:80, i:'🛝', n:0,p:'img/reward-walk.jpg'},
+  {t:'Мороженое',        v:120,i:'🍦', n:0,p:'img/reward-icecream.jpg'},
+  {t:'Планшет 1 час',    v:180,i:'📱', n:0,p:'img/reward-tablet.jpg'},
+  {t:'Телевизор 1 час',  v:180,i:'📺', n:0,p:'img/reward-tv.jpg'},
+
+  {t:'Новая книга',      v:300,i:'📖', n:3,p:'img/reward-book.jpg'},
+  {t:'Новая игрушка',    v:350,i:'🧸', n:3,p:'img/reward-toy.jpg'},
+
+  {t:'Поход в кино',     v:450,i:'🎬', n:4,p:'img/reward-cinema.jpg'},
+  {t:'Игровая комната',  v:450,i:'🎠', n:4,p:'img/reward-playroom.jpg'},
+
+  {t:'Мастер-класс',     v:700,i:'🎨', n:7,p:'img/reward-craft.jpg'},
+  {t:'Поход в картинг',  v:800,i:'🏎️',n:7,p:'img/reward-karting.jpg'},
+  {t:'Аквапарк',         v:800,i:'🏊', n:7,p:'img/reward-aquapark.jpg'}
+];
+/* Гардероб. Базовый наряд всегда есть и бесплатен, остальные покупаются за звёзды.
+   Картинка наряда становится аватаром в шапке, когда его надевают. */
+var OUTFITS=[
+  {id:'base',    t:'Фиолетовое худи',  v:0,   i:'👚', p:'img/avatar.jpg'},
+  {id:'unicorn', t:'Халат-единорог',   v:150, i:'🦄', p:'img/outfit-unicorn.jpg'},
+  {id:'sport',   t:'Спортивный костюм',v:250, i:'🤸', p:'img/outfit-sport.jpg'},
+  {id:'princess',t:'Платье принцессы', v:400, i:'👑', p:'img/outfit-princess.jpg'},
+  {id:'ballet',  t:'Балетная пачка',   v:500, i:'🩰', p:'img/outfit-ballet.jpg'},
+  {id:'space',   t:'Скафандр',         v:600, i:'🚀', p:'img/outfit-space.jpg'}
+];
+
+/* Аксессуары надеваются поверх любого наряда и рисуются наклейкой на самом аватаре.
+   Файлы — PNG с прозрачным фоном. x, y — центр наклейки в процентах от кружка аватара,
+   w — её ширина, r — наклон в градусах. */
+var ACCS=[
+  {id:'bow',       t:'Бантик-звезда',      v:100, i:'🎀', p:'img/acc-bow.png',
+   x:18, y:14, w:64, r:-15},
+  {id:'glasses',   t:'Очки-сердечки',      v:200, i:'😎', p:'img/acc-glasses.png',
+   x:50, y:46, w:112, r:0},
+  {id:'headphones',t:'Наушники',           v:300, i:'🎧', p:'img/acc-headphones.png',
+   x:50, y:30, w:136, r:0},
+  {id:'wand',      t:'Волшебная палочка',  v:350, i:'🪄', p:'img/acc-wand.png',
+   x:86, y:56, w:84, r:20},
+  {id:'backpack',  t:'Рюкзак-единорог',    v:450, i:'🎒', p:'img/acc-backpack.png',
+   x:14, y:66, w:72, r:0},
+  {id:'crown',     t:'Золотая корона',     v:700, i:'👑', p:'img/acc-crown.png',
+   x:50, y:2, w:96, r:0}
+];
+
+/* Каталог готового: дела и награды, к которым уже есть картинки.
+   Родитель выбирает из списка — название, значок, картинка и цена подставляются сами.
+   d — описание для ребёнка, n — через сколько дней подряд открыть награду. */
+var CAT_TASKS=[
+  {t:'Заправить кровать',   v:20,i:'🛏️',p:'img/task-bed.jpg',      d:'Расправь простыню, положи подушку ровно и накрой кровать покрывалом.'},
+  {t:'Почистить зубы',      v:10,i:'🪥',p:'img/task-teeth.jpg',    d:'Пасты размером с горошину. Верхние зубы сверху вниз, нижние — снизу вверх. Две минуты.'},
+  {t:'Убрать игрушки',      v:25,i:'🧸',p:'img/task-toys.jpg',     d:'Мягкие игрушки — в корзину, конструктор — в коробку.'},
+  {t:'Сделать уроки',       v:50,i:'📚',p:'img/task-homework.jpg', d:'Достань тетрадь, напиши число, реши задания.'},
+  {t:'Покормить кота',      v:15,i:'🐱',p:'img/task-cat.jpg',      d:'Насыпь корм в миску и проверь, есть ли свежая вода.'},
+  {t:'Полить цветы',        v:15,i:'🪴',p:'img/task-plants.jpg',   d:'Полей тёплой водой под корень. Земля должна стать влажной, но не мокрой.'},
+  {t:'Помыть посуду',       v:30,i:'🍽️',p:'img/task-dishes.jpg',   d:'Помой тарелки и чашки, поставь сушиться.'},
+  {t:'Вынести мусор',       v:15,i:'🗑️',p:'img/task-trash.jpg',    d:'Завяжи пакет и вынеси к мусоропроводу.'},
+  {t:'Пропылесосить пол',   v:30,i:'🧹',p:'img/task-floor.jpg',    d:'Пройди пылесосом весь ковёр, особенно под столом.'},
+  {t:'Протереть стол',      v:15,i:'🧽',p:'img/task-table.jpg',    d:'Убери со стола лишнее и протри его влажной салфеткой.'},
+  {t:'Сложить одежду',      v:20,i:'👕',p:'img/task-clothes.jpg',  d:'Сложи чистые вещи стопкой и убери в комод.'},
+  {t:'Принять душ',         v:15,i:'🚿',p:'img/task-shower.jpg',   d:'Не забудь помыть голову и вытереться насухо.'},
+  {t:'Собрать портфель',    v:20,i:'🎒',p:'img/task-backpack.jpg', d:'Сложи тетради и пенал по расписанию на завтра.'},
+  {t:'Погулять с собакой',  v:25,i:'🐶',p:'img/task-dog.jpg',      d:'Погуляй во дворе и не забудь воду.'},
+  {t:'Почитать книгу',      v:25,i:'📖',p:'img/task-read.jpg',     d:'Почитай двадцать минут и расскажи, что было интересного.'},
+  {t:'Помочь готовить',     v:25,i:'🥣',p:'img/task-cook.jpg',     d:'Помоги на кухне: помешай, насыпь, накрой на стол.'},
+  {t:'Сделать зарядку',     v:15,i:'🤸',p:'img/task-exercise.jpg', d:'Разомнись как следует: руки, спина, ноги.'},
+  {t:'Поиграть на фортепиано',v:30,i:'🎹',p:'img/task-piano.jpg',  d:'Поиграй гаммы и любимую пьесу.'}
+];
+
+var CAT_REWARDS=[
+  {t:'Погулять во дворе', v:80, i:'🛝', n:0,p:'img/reward-walk.jpg'},
+  {t:'Мороженое',         v:120,i:'🍦', n:0,p:'img/reward-icecream.jpg'},
+  {t:'Планшет 1 час',     v:180,i:'📱', n:0,p:'img/reward-tablet.jpg'},
+  {t:'Телевизор 1 час',   v:180,i:'📺', n:0,p:'img/reward-tv.jpg'},
+  {t:'Пицца',             v:250,i:'🍕', n:0,p:'img/reward-pizza.jpg'},
+  {t:'Новая книга',       v:300,i:'📖', n:3,p:'img/reward-book.jpg'},
+  {t:'Новая игрушка',     v:350,i:'🧸', n:3,p:'img/reward-toy.jpg'},
+  {t:'Поход в кино',      v:450,i:'🎬', n:4,p:'img/reward-cinema.jpg'},
+  {t:'Игровая комната',   v:450,i:'🎠', n:4,p:'img/reward-playroom.jpg'},
+  {t:'Парк аттракционов', v:500,i:'🎡', n:4,p:'img/reward-park.jpg'},
+  {t:'Мастер-класс',      v:700,i:'🎨', n:7,p:'img/reward-craft.jpg'},
+  {t:'Зоопарк',           v:700,i:'🦁', n:7,p:'img/reward-zoo.jpg'},
+  {t:'Поход в картинг',   v:800,i:'🏎️',n:7,p:'img/reward-karting.jpg'},
+  {t:'Аквапарк',          v:800,i:'🏊', n:7,p:'img/reward-aquapark.jpg'}
+];
+
+var RANKS=['Новичок','Помощница','Умница','Хозяюшка','Мастер','Легенда'];
+var STEP=500;
+
+var S={
+  stars:Store.get('ys_stars',0),
+  earned:Store.get('ys_earned',0),
+  done:Store.get('ys_done',0),
+  bought:Store.get('ys_bought',0),
+  tasks:Store.get('ys_tasks',null)||SEED_TASKS.map(function(x){return{title:x.t,value:x.v,icon:x.i,img:x.p,desc:x.d,status:'new'}}),
+  rewards:Store.get('ys_rewards',null)||SEED_REWARDS.map(function(x){return{title:x.t,value:x.v,icon:x.i,img:x.p,days:x.n}}),
+  streak:Store.get('ys_streak',0),
+  best:Store.get('ys_best',0),
+  owned:Store.get('ys_owned',null)||['base'],
+  worn:Store.get('ys_worn','')||'base',
+  acc:Store.get('ys_acc','')||''
+};
+if(S.owned.indexOf('base')<0)S.owned.push('base');
+
+/* Старые сохранения не знают про папку img — дописываем картинки по названию. */
+(function(){
+  function fill(list,seed){
+    if(!list)return;
+    for(var i=0;i<list.length;i++){
+      if(list[i].img)continue;
+      for(var j=0;j<seed.length;j++){
+        if(seed[j].t===list[i].title&&seed[j].p){list[i].img=seed[j].p;break}
+      }
+      /* Своим делам родителя картинка подбирается по названию. */
+      if(!list[i].img)list[i].img=pickPic(list[i].title);
+      /* Старые сохранения не знают про серии — проставляем требование по названию. */
+      if(list[i].days===undefined){
+        list[i].days=0;
+        for(var k=0;k<seed.length;k++){
+          if(seed[k].t===list[i].title&&seed[k].n){list[i].days=seed[k].n;break}
+        }
+      }
+    }
+  }
+  fill(S.tasks,SEED_TASKS);
+  fill(S.rewards,SEED_REWARDS);
+})();
+
+var page='home', parentOn=false, toastTimer=null;
+var roomPic=Store.get('ys_room','')||'';
+var facePic=Store.get('ys_face','')||'';
+
+/* Картинки лежат в папке img рядом с этим файлом.
+   Любой недостающий файл просто откатывается на рисованную графику. */
+var ROOM_DEFAULT='img/room.jpg';
+var AVATAR_DEFAULT='img/avatar.jpg';
+var SCENE_IMG={
+  home:'img/scene-home.jpg',
+  tasks:'img/scene-tasks.jpg',
+  shop:'img/scene-shop.jpg',
+  awards:'img/scene-awards.jpg',
+  parent:'img/scene-parent.jpg'
+};
+var missing={};
+
+function sceneSources(){
+  if(roomPic)return[roomPic];
+  var list=[];
+  if(SCENE_IMG[page])list.push(SCENE_IMG[page]);
+  list.push(ROOM_DEFAULT);
+  return list.filter(function(s){return !missing[s]});
+}
+
+function applyScene(){
+  var img=$('#roomPhoto'), svg=$('.scene-svg');
+  var list=sceneSources();
+  if(!list.length){
+    img.removeAttribute('src');img.hidden=true;
+    svg.style.visibility='visible';
+    return;
+  }
+  var src=list[0];
+  if(img.getAttribute('src')===src)return;
+  img.onerror=function(){missing[src]=true;img.removeAttribute('src');applyScene()};
+  img.onload=function(){img.hidden=false;svg.style.visibility='hidden'};
+  img.src=src;
+}
+
+function applyAcc(){
+  var badge=$('#accBadge'), a=accessory();
+  if(!a){badge.hidden=true;badge.innerHTML='';badge.removeAttribute('style');return}
+  badge.hidden=false;
+  badge.style.left=a.x+'%';
+  badge.style.top=a.y+'%';
+  badge.style.width=a.w+'%';
+  badge.style.transform='translate(-50%,-50%) rotate('+(a.r||0)+'deg)';
+  badge.style.fontSize=Math.round(a.w*0.44)+'px';
+  /* Нет файла аксессуара — на том же месте показываем значок. */
+  badge.innerHTML=missing[a.p]?esc(a.i):
+    '<img src="'+esc(a.p)+'" alt="" onerror="missing[\''+a.p+'\']=true;applyAcc()">';
+}
+
+function applyFace(){
+  var box=$('#avatarBox'), old=document.getElementById('faceImg');
+  applyAcc();
+  /* Надет наряд — показываем его. Базовый наряд уступает место загруженному фото. */
+  var src;
+  if(S.worn!=='base'){
+    src=missing[outfit().p]?'':outfit().p;
+  }else{
+    src=facePic||(missing[AVATAR_DEFAULT]?'':AVATAR_DEFAULT);
+  }
+  if(!src){
+    if(old)old.remove();
+    $('#avatarSvg').style.display='block';
+    return;
+  }
+  if(!old){old=document.createElement('img');old.id='faceImg';box.insertBefore(old,box.firstChild)}
+  if(old.getAttribute('src')===src)return;
+  old.onerror=function(){missing[src]=true;old.remove();$('#avatarSvg').style.display='block'};
+  old.onload=function(){$('#avatarSvg').style.display='none'};
+  old.src=src;
+}
+
+function applyPics(){applyScene();applyFace()}
+
+/* Картинка карточки не загрузилась — возвращаем значок. */
+function pic(src,icon){
+  if(!src)return icon;
+  return '<img src="'+esc(src)+'" alt="" onerror="this.parentNode.textContent=\''+esc(icon)+'\'">';
+}
+
+function shrink(file,maxSide,cb){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      var k=Math.min(1,maxSide/Math.max(im.width,im.height));
+      var c=document.createElement('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      cb(c.toDataURL('image/jpeg',0.82));
+    };
+    im.onerror=function(){say('Не получилось открыть файл')};
+    im.src=fr.result;
+  };
+  fr.onerror=function(){say('Не получилось прочитать файл')};
+  fr.readAsDataURL(file);
+}
+
+function askPicture(kind){
+  var inp=$('#filePick');
+  inp.value='';
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0];
+    if(!f)return;
+    shrink(f,kind==='room'?1200:320,function(data){
+      try{
+        if(kind==='room'){roomPic=data;Store.set('ys_room',data)}
+        else{facePic=data;Store.set('ys_face',data)}
+        applyPics();render();say(kind==='room'?'Картинка комнаты обновлена':'Аватар обновлён');
+      }catch(e){say('Картинка слишком большая — возьми файл поменьше')}
+    });
+  };
+  inp.click();
+}
+
+function save(){
+  Store.set('ys_stars',S.stars);Store.set('ys_earned',S.earned);
+  Store.set('ys_done',S.done);Store.set('ys_bought',S.bought);
+  Store.set('ys_tasks',S.tasks);Store.set('ys_rewards',S.rewards);
+  Store.set('ys_owned',S.owned);Store.set('ys_worn',S.worn);Store.set('ys_acc',S.acc);
+  Store.set('ys_streak',S.streak);Store.set('ys_best',S.best);
+}
+
+/* «два дня», «пять дней» — чтобы не писать «5 день». */
+function days(n){
+  var t=n%100, o=n%10;
+  if(t>10&&t<20)return n+' дней';
+  if(o===1)return n+' день';
+  if(o>=2&&o<=4)return n+' дня';
+  return n+' дней';
+}
+
+function outfit(id){
+  for(var i=0;i<OUTFITS.length;i++){if(OUTFITS[i].id===(id||S.worn))return OUTFITS[i]}
+  return OUTFITS[0];
+}
+function accessory(id){
+  var want=id||S.acc;
+  for(var i=0;i<ACCS.length;i++){if(ACCS[i].id===want)return ACCS[i]}
+  return null;
+}
+function ownedOutfits(){
+  var n=0;
+  for(var i=0;i<OUTFITS.length;i++){if(S.owned.indexOf(OUTFITS[i].id)>=0)n++}
+  return n;
+}
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function level(){return Math.floor(S.earned/STEP)+1}
+
+/* Своим делам и наградам родителя значок и картинка подбираются по названию.
+   Порядок важен: сначала идут более узкие слова («аквапарк» до «парк»).
+   Третья колонка — файл из папки img; нет файла на диске — останется значок. */
+var KEYS=[
+  ['зуб','🪥','img/task-teeth.jpg'],
+  ['кроват','🛏️','img/task-bed.jpg'],
+  ['посуд','🍽️','img/task-dishes.jpg'],
+  ['игрушк','🧸','img/task-toys.jpg'],
+  ['урок','📚','img/task-homework.jpg'],
+  ['чита','📖','img/task-read.jpg'],
+  ['кот','🐱','img/task-cat.jpg'],
+  ['собак','🐶','img/task-dog.jpg'],
+  ['цвет','🪴','img/task-plants.jpg'],
+  ['мусор','🗑️','img/task-trash.jpg'],
+  ['настольн','🎲','img/reward-toy.jpg'],
+  ['стол','🧽','img/task-table.jpg'],
+  ['подмест','🧹','img/task-floor.jpg'],
+  ['пылесос','🧹','img/task-floor.jpg'],
+  ['полы','🧹','img/task-floor.jpg'],
+  ['ть пол','🧹','img/task-floor.jpg'],
+  ['одежд','👕','img/task-clothes.jpg'],
+  ['бель','👕','img/task-clothes.jpg'],
+  ['душ','🚿','img/task-shower.jpg'],
+  ['ванн','🛁','img/task-shower.jpg'],
+  ['ранец','🎒','img/task-backpack.jpg'],
+  ['портфел','🎒','img/task-backpack.jpg'],
+  ['готов','🥣','img/task-cook.jpg'],
+  ['спорт','🤸','img/task-exercise.jpg'],
+  ['зарядк','🤸','img/task-exercise.jpg'],
+  ['танц','💃',''],
+  ['рисов','🎨','img/reward-craft.jpg'],
+  ['фортепиано','🎹','img/task-piano.jpg'],
+  ['пианино','🎹','img/task-piano.jpg'],
+  ['музык','🎹','img/task-piano.jpg'],
+  ['гамм','🎹','img/task-piano.jpg'],
+  ['кино','🎬','img/reward-cinema.jpg'],
+  ['игров','🎠','img/reward-playroom.jpg'],
+  ['планшет','📱','img/reward-tablet.jpg'],
+  ['телевизор','📺','img/reward-tv.jpg'],
+  ['гулят','🛝','img/reward-walk.jpg'],
+  ['прогул','🛝','img/reward-walk.jpg'],
+  ['зоопарк','🦁','img/reward-zoo.jpg'],
+  ['аквапарк','🏊','img/reward-aquapark.jpg'],
+  ['парк','🎡','img/reward-park.jpg'],
+  ['картинг','🏎️','img/reward-karting.jpg'],
+  ['морожен','🍦','img/reward-icecream.jpg'],
+  ['пицц','🍕','img/reward-pizza.jpg'],
+  ['книг','📖','img/reward-book.jpg'],
+  ['игр','🎮','img/reward-toy.jpg']
+];
+
+function lookup(name){
+  var n=String(name).toLowerCase();
+  for(var i=0;i<KEYS.length;i++){if(n.indexOf(KEYS[i][0])>=0)return KEYS[i]}
+  return null;
+}
+function pickIcon(name){var k=lookup(name);return k?k[1]:'🎯'}
+function pickPic(name){var k=lookup(name);return k?k[2]:''}
+
+
+/* ── Голос героини ───────────────────────────────────────────────
+   Читает реплики синтезом речи, встроенным в систему. Если позже
+   положить записи в папку audio (scene-home.mp3, task-bed.mp3 и т.д.),
+   игра возьмёт их вместо синтеза. */
+var VOICE=Store.get('ys_voice',1), voiceReady=false, ruVoice=null, pending=null;
+var PITCH=Store.get('ys_pitch',1.7);   /* выше — звонче и по-детски */
+var RATE =Store.get('ys_rate',1.05);   /* чуть быстрее — звучит веселее */
+var VNAME=Store.get('ys_vname','');    /* выбранный голос, у каждого устройства свой набор */
+var ruList=[];
+
+function pickVoice(){
+  try{
+    var vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    ruList=vs.filter(function(v){return /^ru/i.test(v.lang||'')});
+    if(VNAME){
+      var saved=ruList.filter(function(v){return v.name===VNAME})[0];
+      if(saved){ruVoice=saved;return}
+    }
+    /* Лучшие женские русские голоса: Milena на Apple, Irina на Windows, Google на Android. */
+    var best=/milena|irina|svetlana|dariya|alena|katya|tatyana|google/i;
+    ruVoice=ruList.filter(function(v){return best.test(v.name||'')})[0]||ruList[0]||null;
+  }catch(e){ruVoice=null}
+}
+if(window.speechSynthesis){
+  pickVoice();
+  try{speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
+}
+
+function tts(text){
+  if(!window.speechSynthesis)return;
+  try{
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang='ru-RU';
+    u.pitch=PITCH;
+    u.rate=RATE;
+    if(ruVoice)u.voice=ruVoice;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function playVoice(text,key){
+  if(key){
+    var src='audio/'+key+'.mp3';
+    if(!missing[src]){
+      try{
+        var a=new Audio(src), fell=false;
+        /* Ошибка приходит двумя путями — читаем вслух только один раз. */
+        var fallback=function(){if(fell)return;fell=true;missing[src]=true;tts(text)};
+        a.onerror=fallback;
+        var pr=a.play();
+        if(pr&&pr.catch)pr.catch(fallback);
+        return;
+      }catch(e){missing[src]=true}
+    }
+  }
+  tts(text);
+}
+
+function speak(text,key){
+  if(!VOICE||!text)return;
+  /* iOS не разрешает говорить до первого касания — придержим фразу. */
+  if(!voiceReady){pending={t:text,k:key};return}
+  playVoice(text,key);
+}
+
+function unlockVoice(){
+  if(voiceReady)return;
+  voiceReady=true;
+  pickVoice();
+  if(pending){playVoice(pending.t,pending.k);pending=null}
+}
+document.addEventListener('pointerdown',unlockVoice);
+document.addEventListener('keydown',unlockVoice);
+
+function paintVoice(){
+  var b=$('#voiceBtn');
+  if(!b)return;
+  b.textContent=VOICE?'🔊':'🔇';
+  b.setAttribute('title',VOICE?'Голос включён':'Голос выключен');
+}
+
+function paintHeader(pop){
+  $('#starCount').textContent=S.stars;
+  var L=level();
+  $('#lvlBadge').textContent=L;
+  $('#rankName').textContent=RANKS[Math.min(L-1,RANKS.length-1)];
+  $('#xpFill').style.width=Math.round((S.earned%STEP)/STEP*100)+'%';
+  if(pop){var p=$('#purse');p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop')}
+}
+
+function say(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  speak(msg);
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show')},2400);
+}
+
+function burst(el){
+  var screen=$('.screen'),box=screen.getBoundingClientRect(),r=el.getBoundingClientRect();
+  for(var i=0;i<10;i++){
+    var s=document.createElement('div');
+    s.className='spark';s.textContent='⭐';
+    s.style.left=(r.left-box.left+r.width/2)+'px';
+    s.style.top=(r.top-box.top+r.height/2)+'px';
+    s.style.setProperty('--dx',(Math.random()*220-110)+'px');
+    s.style.setProperty('--dy',(-70-Math.random()*130)+'px');
+    s.style.setProperty('--rot',(Math.random()*360-180)+'deg');
+    screen.appendChild(s);
+    (function(node){setTimeout(function(){node.remove()},950)})(s);
+  }
+}
+
+var SCENE={
+  home:['Моя комната','Я сегодня всё сделаю сама!'],
+  tasks:['Мои миссии','Выбирай задание — и вперёд!'],
+  shop:['Магазин наград','Копим звёзды на что-то классное'],
+  wear:['Гардероб','Что наденем сегодня?'],
+  awards:['Мои награды','Смотри, сколько я уже смогла!'],
+  parent:['Родителям','Тут мама с папой всё настроят']
+};
+
+function go(p){
+  page=p;
+  var btns=document.querySelectorAll('.nav button');
+  for(var i=0;i<btns.length;i++){
+    if(btns[i].getAttribute('data-go')===p)btns[i].setAttribute('aria-current','page');
+    else btns[i].removeAttribute('aria-current');
+  }
+  $('#sceneTag').textContent=SCENE[p][0];
+  $('#sceneSay').textContent=SCENE[p][1];
+  speak(SCENE[p][1],'scene-'+p);
+  applyScene();
+  render();
+}
+
+function render(){
+  var body=$('#pageBody'),note=$('#pageNote');
+  var titles={home:'Комната',tasks:'Задания',shop:'Магазин наград',wear:'Гардероб',awards:'Достижения',parent:'Родительский режим'};
+  $('#pageTitle').textContent=titles[page];
+  paintHeader();
+
+  if(page==='home'){
+    var toLvl=STEP-(S.earned%STEP);
+    var sorted=S.rewards.slice().sort(function(a,b){return a.value-b.value});
+    var next=null;
+    for(var i=0;i<sorted.length;i++){if(sorted[i].value>S.stars){next=sorted[i];break}}
+    if(!next)next=sorted[sorted.length-1]||null;
+    var todo=S.tasks.filter(function(t){return t.status==='new'});
+    note.textContent='Уровень '+level();
+
+    var html='<div class="stats">'+
+      '<div class="stat"><b>'+S.done+'</b><span>дел сделано</span></div>'+
+      '<div class="stat"><b>'+S.earned+'</b><span>звёзд заработано</span></div>'+
+      '<div class="stat"><b>'+S.bought+'</b><span>наград получено</span></div></div>';
+    if(next){
+      var pct=Math.min(100,Math.round(S.stars/next.value*100));
+      html+='<div class="goal"><h3>'+(next.icon||'🎁')+' Ближайшая цель: '+esc(next.title)+'</h3>'+
+        '<p>'+(S.stars>=next.value?'Хватает! Загляни в магазин наград':'Осталось накопить '+(next.value-S.stars)+' ⭐')+'</p>'+
+        '<div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+    }
+    html+='<div class="sub-title">Сегодня можно сделать</div>';
+    if(todo.length){
+      html+=todo.map(function(t){return{t:t,i:S.tasks.indexOf(t)}}).slice(0,5).map(function(o){
+        return '<div class="line tap" data-info="'+o.i+'"><span class="ic">'+(o.t.icon||'🎯')+'</span>'+
+          '<div><b>'+esc(o.t.title)+'</b><small>нажми, чтобы посмотреть</small></div>'+
+          '<span class="tail">+'+o.t.value+' ⭐</span></div>';
+      }).join('');
+      html+='<button class="btn" id="goTasks" style="margin-top:6px">Открыть задания</button>';
+    }else{
+      html+='<div class="empty"><div class="big">🎉</div><h2>Все дела сделаны</h2><p>До следующего дня можно отдыхать</p></div>';
+    }
+    html+='<p class="hint" style="margin-top:12px">До '+(level()+1)+' уровня осталось '+toLvl+' ⭐</p>';
+    body.innerHTML=html;
+    body.querySelectorAll('[data-info]').forEach(function(b){
+      b.onclick=function(){taskSheet(+b.getAttribute('data-info'))};
+    });
+    if($('#goTasks'))$('#goTasks').onclick=function(){go('tasks')};
+    return;
+  }
+
+  if(page==='tasks'){
+    var left=S.tasks.filter(function(t){return t.status!=='completed'}).length;
+    note.textContent=left?('Осталось '+left):'Всё готово';
+    var inner='';
+    if(S.tasks.length===0){
+      inner='<div class="empty"><div class="big">📋</div><h2>Заданий пока нет</h2><p>Попроси маму или папу открыть раздел «Родителям» и добавить первое дело</p></div>';
+    }else{
+      inner=S.tasks.map(function(t,i){
+        var btn,rib='';
+        if(t.status==='completed'){btn='<button class="btn" disabled>Готово</button>';rib='<div class="ribbon mint">✓ сделано</div>'}
+        else if(t.status==='pending'){
+          rib='<div class="ribbon">на проверке</div>';
+          btn=parentOn?'<button class="btn mint" data-ok="'+i+'">Засчитать +'+t.value+' ⭐</button>'
+                      :'<button class="btn" disabled>Ждём маму ⏳</button>';
+        }else{btn='<button class="btn" data-did="'+i+'">Я сделала!</button>'}
+        return '<article class="card'+(t.status==='completed'?' done':'')+'">'+rib+
+          '<div class="thumb tap" data-info="'+i+'">'+pic(t.img,t.icon||'🎯')+'</div>'+
+          '<h2 class="tap" data-info="'+i+'">'+esc(t.title)+'</h2>'+
+          '<span class="price">+'+t.value+' ⭐</span>'+btn+'</article>';
+      }).join('');
+    }
+    body.innerHTML='<div class="grid">'+inner+'</div>';
+    body.querySelectorAll('[data-info]').forEach(function(b){
+      b.onclick=function(){taskSheet(+b.getAttribute('data-info'))};
+    });
+    body.querySelectorAll('[data-did]').forEach(function(b){
+      b.onclick=function(){
+        S.tasks[+b.getAttribute('data-did')].status='pending';
+        save();render();say('Отправила маме на проверку ⏳');
+      };
+    });
+    body.querySelectorAll('[data-ok]').forEach(function(b){
+      b.onclick=function(){
+        var t=S.tasks[+b.getAttribute('data-ok')];
+        t.status='completed';S.stars+=t.value;S.earned+=t.value;S.done++;
+        save();burst(b);paintHeader(true);render();say('+'+t.value+' ⭐ засчитано!');
+      };
+    });
+    return;
+  }
+
+  if(page==='shop'){
+    note.textContent='У тебя '+S.stars+' ⭐ · серия '+days(S.streak);
+    var cards=S.rewards.map(function(r,i){
+      var need=r.days||0;
+      var openNow=S.streak>=need;
+      var can=S.stars>=r.value;
+      var btn;
+      if(!openNow)   btn='<button class="btn" disabled>Ещё '+days(need-S.streak)+' подряд</button>';
+      else if(can)   btn='<button class="btn gold" data-buy="'+i+'">Забрать награду</button>';
+      else           btn='<button class="btn" disabled>Ещё '+(r.value-S.stars)+' ⭐</button>';
+      return '<article class="card'+(openNow?'':' locked')+'">'+
+        (need?'<div class="streak">🔥 '+need+'</div>':'')+
+        '<div class="thumb">'+pic(r.img,r.icon||'🎁')+'</div>'+
+        '<h2>'+esc(r.title)+'</h2><span class="price">'+r.value+' ⭐</span>'+
+        btn+'</article>';
+    }).join('');
+    body.innerHTML='<div class="grid">'+cards+
+      '<article class="card add" id="addWish"><div class="plus">+</div>'+
+      '<h2>Добавить свою награду</h2><p class="hint">О чём ты мечтаешь?</p></article></div>';
+    body.querySelectorAll('[data-buy]').forEach(function(b){
+      b.onclick=function(){
+        var r=S.rewards[+b.getAttribute('data-buy')];
+        if(S.streak<(r.days||0)){say('Эта награда пока закрыта');return}
+        S.stars-=r.value;S.bought++;
+        /* Большая награда тратит накопленную серию, маленькие — нет. */
+        if(r.days)S.streak=0;
+        save();burst(b);paintHeader(true);render();
+        say('Награда твоя: '+r.title+'! Покажи экран родителям');
+      };
+    });
+    $('#addWish').onclick=wishSheet;
+    return;
+  }
+
+  if(page==='wear'){
+    note.textContent='У тебя '+S.stars+' ⭐';
+    var wardrobe=OUTFITS.map(function(o,i){
+      var have=S.owned.indexOf(o.id)>=0;
+      var on=S.worn===o.id;
+      var can=S.stars>=o.v;
+      var btn;
+      if(on)            btn='<button class="btn" disabled>Надето ✨</button>';
+      else if(have)     btn='<button class="btn mint" data-wear="'+o.id+'">Надеть</button>';
+      else if(can)      btn='<button class="btn gold" data-take="'+o.id+'">Купить за '+o.v+' ⭐</button>';
+      else              btn='<button class="btn" disabled>Ещё '+(o.v-S.stars)+' ⭐</button>';
+      return '<article class="card'+(on?' done':'')+'">'+
+        (on?'<div class="ribbon">на тебе</div>':'')+
+        '<div class="thumb">'+pic(have?o.p:'',o.i)+'</div>'+
+        '<h2>'+esc(o.t)+'</h2>'+
+        '<span class="price">'+(have?'твоё':o.v+' ⭐')+'</span>'+btn+'</article>';
+    }).join('');
+    var kit=ACCS.map(function(a){
+      var have=S.owned.indexOf(a.id)>=0;
+      var on=S.acc===a.id;
+      var can=S.stars>=a.v;
+      var btn;
+      if(on)        btn='<button class="btn ghost" data-off="1">Снять</button>';
+      else if(have) btn='<button class="btn mint" data-put="'+a.id+'">Надеть</button>';
+      else if(can)  btn='<button class="btn gold" data-getacc="'+a.id+'">Купить за '+a.v+' ⭐</button>';
+      else          btn='<button class="btn" disabled>Ещё '+(a.v-S.stars)+' ⭐</button>';
+      return '<article class="card'+(on?' done':'')+'">'+
+        (on?'<div class="ribbon">на тебе</div>':'')+
+        '<div class="thumb">'+pic(have?a.p:'',a.i)+'</div>'+
+        '<h2>'+esc(a.t)+'</h2>'+
+        '<span class="price">'+(have?'твоё':a.v+' ⭐')+'</span>'+btn+'</article>';
+    }).join('');
+
+    body.innerHTML='<p class="sub-title">Наряды</p><div class="grid">'+wardrobe+'</div>'+
+      '<div class="divider"></div>'+
+      '<p class="sub-title">Аксессуары</p>'+
+      '<p class="hint" style="margin:-4px 0 10px">Аксессуар надевается поверх любого наряда и виден кружком на аватаре.</p>'+
+      '<div class="grid">'+kit+'</div>';
+
+    body.querySelectorAll('[data-wear]').forEach(function(b){
+      b.onclick=function(){
+        S.worn=b.getAttribute('data-wear');
+        save();applyFace();render();say('Переоделась: '+outfit().t);
+      };
+    });
+    body.querySelectorAll('[data-put]').forEach(function(b){
+      b.onclick=function(){
+        S.acc=b.getAttribute('data-put');
+        save();applyAcc();render();say('Надела: '+accessory().t);
+      };
+    });
+    body.querySelectorAll('[data-off]').forEach(function(b){
+      b.onclick=function(){S.acc='';save();applyAcc();render();say('Сняла аксессуар')};
+    });
+    body.querySelectorAll('[data-getacc]').forEach(function(b){
+      b.onclick=function(){
+        var a=accessory(b.getAttribute('data-getacc'));
+        if(S.stars<a.v){say('Пока не хватает звёзд');return}
+        S.stars-=a.v;S.bought++;
+        S.owned.push(a.id);S.acc=a.id;
+        save();burst(b);paintHeader(true);applyAcc();render();
+        say('Новый аксессуар: '+a.t+'!');
+      };
+    });
+    body.querySelectorAll('[data-take]').forEach(function(b){
+      b.onclick=function(){
+        var o=outfit(b.getAttribute('data-take'));
+        if(S.stars<o.v){say('Пока не хватает звёзд');return}
+        S.stars-=o.v;S.bought++;
+        S.owned.push(o.id);S.worn=o.id;
+        save();burst(b);paintHeader(true);applyFace();render();
+        say('Новый наряд: '+o.t+'!');
+      };
+    });
+    return;
+  }
+
+  if(page==='awards'){
+    var allDone=S.tasks.length>0&&S.tasks.every(function(t){return t.status==='completed'});
+    var A=[
+      {i:'🌱',n:'Первый шаг',d:'Выполнить первое дело',ok:S.done>=1},
+      {i:'🖐️',n:'Пятёрочка',d:'5 выполненных дел',ok:S.done>=5},
+      {i:'💪',n:'Не остановить',d:'15 выполненных дел',ok:S.done>=15},
+      {i:'⭐',n:'Звёздный дождь',d:'Заработать 500 ⭐',ok:S.earned>=500},
+      {i:'🌟',n:'Тысячница',d:'Заработать 1000 ⭐',ok:S.earned>=1000},
+      {i:'🎁',n:'Первая награда',d:'Обменять звёзды на подарок',ok:S.bought>=1},
+      {i:'👗',n:'Модница',d:'Купить три наряда',ok:ownedOutfits()>=4},
+      {i:'🎀',n:'С изюминкой',d:'Купить аксессуар',ok:S.owned.length-ownedOutfits()>=1},
+      {i:'🔥',n:'Три дня подряд',d:'Закрыть все дела три дня подряд',ok:S.best>=3},
+      {i:'📅',n:'Целая неделя',d:'Закрыть все дела семь дней подряд',ok:S.best>=7},
+      {i:'🏆',n:'Чистая победа',d:'Сделать все дела разом',ok:allDone},
+      {i:'👑',n:'Хозяйка дома',d:'Дойти до 3 уровня',ok:level()>=3}
+    ];
+    var got=A.filter(function(a){return a.ok}).length;
+    note.textContent=got+' из '+A.length;
+    body.innerHTML='<div class="badges">'+A.map(function(a){
+      return '<div class="badge'+(a.ok?' on':'')+'"><div class="medal">'+a.i+'</div>'+
+        '<div><h3>'+a.n+'</h3><p>'+(a.ok?'Получено':a.d)+'</p></div></div>';
+    }).join('')+'</div>';
+    return;
+  }
+
+  if(page==='parent'){
+    note.textContent='PIN 1234';
+    var pend=S.tasks.filter(function(t){return t.status==='pending'}).length;
+    var allNow=S.tasks.length>0&&S.tasks.every(function(t){return t.status==='completed'});
+    var h='<div class="goal calm"><h3>'+(pend?(pend+' дел ждут проверки'):'Всё проверено')+'</h3>'+
+      '<p>'+(pend?'Откройте «Задания» и засчитайте звёзды':'Новые заявки появятся здесь')+'</p></div>'+
+      '<div class="goal'+(allNow?'':' calm')+'"><h3>Серия: '+days(S.streak)+'</h3>'+
+      '<p>'+(allNow?'Все дела закрыты — нажмите «Начать новый день», и серия вырастет'
+                   :'Серия растёт только за день, в котором закрыты все дела. Рекорд: '+days(S.best))+'</p></div>'+
+      '<div class="grid" style="margin-bottom:14px">'+
+      '<button class="btn" id="addTask">Добавить дело</button>'+
+      '<button class="btn gold" id="addReward">Добавить награду</button></div>'+
+      '<div class="sub-title">Голос</div>'+
+      '<label class="vrow"><span>Голос</span><select id="vSel"></select></label>'+
+      '<label class="vrow"><span>Звонкость</span><input id="vPitch" type="range" min="0.6" max="2" step="0.05" value="'+PITCH+'"></label>'+
+      '<label class="vrow"><span>Скорость</span><input id="vRate" type="range" min="0.6" max="1.6" step="0.05" value="'+RATE+'"></label>'+
+      '<button class="btn ghost" id="vTest" style="margin-bottom:8px">Послушать</button>'+
+      '<p class="hint" style="margin-bottom:14px">Наборы голосов на компьютере и на планшете разные — подберите самый детский на каждом устройстве. Настройка хранится отдельно для каждого.</p>'+
+      '<div class="sub-title">Картинки</div>'+
+      '<div class="grid" style="margin-bottom:8px">'+
+      '<button class="btn ghost" id="picRoom">Фон комнаты</button>'+
+      '<button class="btn ghost" id="picFace">Аватар</button></div>'+
+      (roomPic||facePic?'<button class="btn coral" id="picClear" style="margin-bottom:8px">Вернуть рисованную комнату</button>':'')+
+      '<p class="hint" style="margin-bottom:14px">Подойдёт любая картинка из галереи: фото, рисунок или изображение из нейросети. Она сохранится на этом устройстве.</p>'+
+      '<div class="sub-title">Дела</div>';
+    h+=S.tasks.length?S.tasks.map(function(t,i){
+      var st=t.status==='completed'?'выполнено':(t.status==='pending'?'на проверке':'активно');
+      return '<div class="line"><span class="ic">'+(t.icon||'🎯')+'</span>'+
+        '<div><b>'+esc(t.title)+'</b><small>'+st+'</small></div>'+
+        '<span class="tail">+'+t.value+' ⭐</span>'+
+        '<button class="kill" data-delt="'+i+'" aria-label="Удалить">✕</button></div>';
+    }).join(''):'<p class="hint">Дел пока нет</p>';
+    h+='<div class="divider"></div><div class="sub-title">Награды</div>';
+    h+=S.rewards.length?S.rewards.map(function(r,i){
+      return '<div class="line"><span class="ic">'+(r.icon||'🎁')+'</span>'+
+        '<div><b>'+esc(r.title)+'</b><small>в магазине</small></div>'+
+        '<span class="tail">'+r.value+' ⭐</span>'+
+        '<button class="kill" data-delr="'+i+'" aria-label="Удалить">✕</button></div>';
+    }).join(''):'<p class="hint">Наград пока нет</p>';
+    h+='<div class="divider"></div>'+
+      '<button class="btn ghost" id="newDay">Начать новый день</button><div style="height:8px"></div>'+
+      '<button class="btn coral" id="wipe">Сбросить всю игру</button><div style="height:10px"></div>'+
+      '<p class="hint">«Новый день» вернёт выполненные дела в список. Звёзды и награды останутся.</p>';
+    body.innerHTML=h;
+    /* Настройка голоса */
+    (function(){
+      var sel=$('#vSel');
+      if(!sel)return;
+      pickVoice();
+      if(!ruList.length){
+        sel.innerHTML='<option>русских голосов не найдено</option>';
+        sel.disabled=true;
+      }else{
+        sel.innerHTML=ruList.map(function(v){
+          return '<option value="'+esc(v.name)+'"'+(ruVoice&&v.name===ruVoice.name?' selected':'')+'>'+esc(v.name)+'</option>';
+        }).join('');
+        sel.onchange=function(){
+          VNAME=this.value;Store.set('ys_vname',VNAME);pickVoice();
+          voiceReady=true;tts('Привет! Я Ксюша, и я всё сделаю сама!');
+        };
+      }
+      $('#vPitch').oninput=function(){PITCH=parseFloat(this.value);Store.set('ys_pitch',PITCH)};
+      $('#vRate').oninput=function(){RATE=parseFloat(this.value);Store.set('ys_rate',RATE)};
+      $('#vTest').onclick=function(){voiceReady=true;tts('Привет! Я Ксюша, и я сегодня всё сделаю сама!')};
+    })();
+
+    $('#addTask').onclick=function(){editSheet('task')};
+    $('#picRoom').onclick=function(){askPicture('room')};
+    $('#picFace').onclick=function(){askPicture('face')};
+    if($('#picClear'))$('#picClear').onclick=function(){
+      roomPic='';facePic='';Store.set('ys_room','');Store.set('ys_face','');
+      applyPics();render();say('Вернул рисованную комнату');
+    };
+    $('#addReward').onclick=function(){editSheet('reward')};
+    body.querySelectorAll('[data-delt]').forEach(function(b){
+      b.onclick=function(){S.tasks.splice(+b.getAttribute('data-delt'),1);save();render()};
+    });
+    body.querySelectorAll('[data-delr]').forEach(function(b){
+      b.onclick=function(){S.rewards.splice(+b.getAttribute('data-delr'),1);save();render()};
+    });
+    $('#newDay').onclick=function(){
+      /* Серия растёт, только если за день закрыты ВСЕ дела. */
+      var all=S.tasks.length>0&&S.tasks.every(function(t){return t.status==='completed'});
+      S.streak=all?S.streak+1:0;
+      if(S.streak>S.best)S.best=S.streak;
+      S.tasks.forEach(function(t){t.status='new'});
+      save();render();
+      say(all?('День засчитан! Серия: '+days(S.streak))
+             :'Новый день начался. Серия обнулилась — не все дела были сделаны');
+    };
+    $('#wipe').onclick=confirmSheet;
+  }
+}
+
+function taskSheet(i){
+  var t=S.tasks[i];
+  if(!t)return;
+  var thumb=pic(t.img,t.icon||'🎯');
+  var act;
+  if(t.status==='completed')act='<button class="btn" disabled>Уже сделано</button>';
+  else if(t.status==='pending')act=parentOn
+    ?'<button class="btn mint" id="dOk">Засчитать +'+t.value+' ⭐</button>'
+    :'<button class="btn" disabled>Ждём проверки ⏳</button>';
+  else act='<button class="btn" id="dDo">Я сделала!</button>';
+  openSheet('<div class="det-thumb">'+thumb+'</div>'+
+    '<h2>'+esc(t.title)+'</h2>'+
+    '<p class="det-desc">'+(t.desc?esc(t.desc):'Сделай это дело — и получишь звёзды.')+'</p>'+
+    '<div class="det-meta"><span class="price">+'+t.value+' ⭐</span>'+act+'</div>'+
+    '<button class="btn ghost" id="dNo">Закрыть</button>');
+  speak(t.title+'. '+(t.desc||'Сделай это дело — и получишь звёзды.'),
+        t.img?t.img.replace(/^img\//,'').replace(/\.\w+$/,''):null);
+  $('#dNo').onclick=closeSheet;
+  if($('#dDo'))$('#dDo').onclick=function(){
+    t.status='pending';save();closeSheet();render();say('Отправила маме на проверку ⏳');
+  };
+  if($('#dOk'))$('#dOk').onclick=function(){
+    t.status='completed';S.stars+=t.value;S.earned+=t.value;S.done++;
+    save();closeSheet();paintHeader(true);render();say('+'+t.value+' ⭐ засчитано!');
+  };
+}
+
+function openSheet(html){$('#sheetBox').innerHTML=html;$('#sheet').classList.add('open')}
+function closeSheet(){$('#sheet').classList.remove('open')}
+$('#sheet').onclick=function(e){if(e.target.id==='sheet')closeSheet()};
+
+function askPin(){
+  openSheet('<h2>🔒 Родительский режим</h2>'+
+    '<p class="hint">Введите PIN, чтобы добавлять дела, засчитывать звёзды и настраивать награды.</p>'+
+    '<input type="password" inputmode="numeric" id="pin" placeholder="PIN по умолчанию 1234" autocomplete="off">'+
+    '<button class="btn" id="pinOk">Войти</button>'+
+    '<button class="btn ghost" id="pinNo">Отмена</button>');
+  function enter(){
+    if($('#pin').value.trim()!=='1234'){say('PIN не подошёл');return}
+    parentOn=true;closeSheet();go('parent');say('Режим родителя включён');
+  }
+  $('#pinOk').onclick=enter;
+  $('#pinNo').onclick=closeSheet;
+  $('#pin').onkeydown=function(e){if(e.key==='Enter')enter()};
+  setTimeout(function(){$('#pin').focus()},60);
+}
+
+function editSheet(kind){
+  var isTask=kind==='task';
+  var cat=isTask?CAT_TASKS:CAT_REWARDS;
+  /* Уже добавленное в список не показываем, чтобы не плодить дубли. */
+  var have={};
+  (isTask?S.tasks:S.rewards).forEach(function(x){have[x.title]=1});
+  var opts='<option value="">— выберите из готовых —</option>';
+  cat.forEach(function(c,i){
+    if(!have[c.t])opts+='<option value="'+i+'">'+c.i+'  '+esc(c.t)+'</option>';
+  });
+  opts+='<option value="own">✏️  Своё '+(isTask?'дело':'награда')+'…</option>';
+
+  openSheet('<h2>'+(isTask?'📋 Новое дело':'🎁 Новая награда')+'</h2>'+
+    '<label>Готовые '+(isTask?'дела':'награды')+' — с картинками</label>'+
+    '<select id="fPick">'+opts+'</select>'+
+    '<p class="hint">Выберите из списка — название, значок и картинка подставятся сами. Или «Своё», чтобы вписать вручную.</p>'+
+    '<label>Название</label>'+
+    '<input id="fTitle" placeholder="'+(isTask?'Например: убрать со стола':'Например: поход в кино')+'">'+
+    '<label>'+(isTask?'Сколько звёзд за выполнение':'Цена в звёздах')+'</label>'+
+    '<input id="fVal" type="number" min="1" value="'+(isTask?20:500)+'">'+
+    (isTask?'<label>Описание — что именно нужно сделать</label>'+
+      '<input id="fDesc" placeholder="Необязательно: пара фраз для ребёнка">'
+      :'<label>Открыть после скольких дней подряд</label>'+
+       '<input id="fDays" type="number" min="0" value="0">'+
+       '<p class="hint">0 — доступна сразу, как мороженое. Больше нуля — откроется, только когда все дела закрыты столько дней подряд, и покупка обнулит серию.</p>')+
+    '<label>Значок или картинка</label>'+
+    '<input id="fImg" placeholder="Необязательно: 🐱, img/файл.jpg или https://...">'+
+    '<p class="hint">Оставьте пустым — картинка подберётся по названию. «Помыть посуду», «вынести мусор», «собрать портфель» и другие привычные дела игра узнаёт сама.</p>'+
+    '<button class="btn mint" id="fSave">Сохранить</button>'+
+    '<button class="btn ghost" id="fNo">Отмена</button>');
+  $('#fNo').onclick=closeSheet;
+
+  var chosen=null;
+  $('#fPick').onchange=function(){
+    var val=this.value;
+    if(val==='own'||val===''){
+      chosen=null;
+      if(val==='own'){$('#fTitle').value='';$('#fImg').value='';$('#fTitle').focus()}
+      return;
+    }
+    chosen=cat[+val];
+    $('#fTitle').value=chosen.t;
+    $('#fVal').value=chosen.v;
+    $('#fImg').value=chosen.p;
+    if(isTask&&$('#fDesc'))$('#fDesc').value=chosen.d||'';
+    if(!isTask&&$('#fDays'))$('#fDays').value=chosen.n||0;
+  };
+
+  $('#fSave').onclick=function(){
+    var title=$('#fTitle').value.trim(),v=parseInt($('#fVal').value,10),img=$('#fImg').value.trim();
+    if(!title){say('Впишите название');return}
+    if(!v||v<1){say('Укажите количество звёзд');return}
+    var item={title:title,value:v,icon:pickIcon(title),img:pickPic(title)};
+    if(isTask&&$('#fDesc'))item.desc=$('#fDesc').value.trim();
+    if(/^(https?:|\.?\/|img\/)/.test(img))item.img=img;
+    else if(img&&img.length<=4)item.icon=img;
+    if(isTask){item.status='new';S.tasks.push(item)}
+    else{item.days=Math.max(0,parseInt($('#fDays').value,10)||0);S.rewards.push(item)}
+    save();closeSheet();render();say(isTask?'Дело добавлено':'Награда в магазине');
+  };
+  setTimeout(function(){$('#fTitle').focus()},60);
+}
+
+function wishSheet(){
+  openSheet('<h2>💭 Моя мечта</h2>'+
+    '<p class="hint">Напиши, что тебе хочется. Родители посмотрят и назначат цену в звёздах.</p>'+
+    '<input id="wTitle" placeholder="Например: набор для рисования">'+
+    '<input id="wVal" type="number" min="1" placeholder="Сколько звёзд, по-твоему?">'+
+    '<button class="btn gold" id="wSave">Добавить в магазин</button>'+
+    '<button class="btn ghost" id="wNo">Отмена</button>');
+  $('#wNo').onclick=closeSheet;
+  $('#wSave').onclick=function(){
+    var t=$('#wTitle').value.trim(),v=parseInt($('#wVal').value,10)||500;
+    if(!t){say('Впиши название');return}
+    S.rewards.push({title:t,value:v,icon:pickIcon(t),img:pickPic(t)});
+    save();closeSheet();render();say('Мечта добавлена в магазин ✨');
+  };
+  setTimeout(function(){$('#wTitle').focus()},60);
+}
+
+function confirmSheet(){
+  openSheet('<h2>⚠️ Сбросить игру</h2>'+
+    '<p class="hint">Удалятся звёзды, уровень, все дела и награды. Отменить это будет нельзя.</p>'+
+    '<button class="btn coral" id="cYes">Да, сбросить всё</button>'+
+    '<button class="btn ghost" id="cNo">Оставить как есть</button>');
+  $('#cNo').onclick=closeSheet;
+  $('#cYes').onclick=function(){Store.wipe();location.reload()};
+}
+
+document.querySelectorAll('.nav button').forEach(function(b){
+  var target=b.getAttribute('data-go');
+  if(!target)return;
+  b.onclick=function(){
+    if(target==='parent'&&!parentOn){askPin();return}
+    go(target);
+  };
+});
+
+$('#voiceBtn').onclick=function(){
+  VOICE=VOICE?0:1;
+  Store.set('ys_voice',VOICE);
+  paintVoice();
+  if(VOICE){voiceReady=true;speak(SCENE[page][1],'scene-'+page)}
+  else if(window.speechSynthesis)try{speechSynthesis.cancel()}catch(e){}
+  say(VOICE?'Голос включён':'Голос выключен');
+};
+
+/* Нажатие на реплику героини — повторить её вслух. */
+$('#sceneSay').onclick=function(){speak(SCENE[page][1],'scene-'+page)};
+$('#sceneSay').style.cursor='pointer';
+
+applyPics();
+paintVoice();
+go('home');
+
+/* Офлайн-режим. Работает только по https — на GitHub Pages включится сам,
+   при открытии файла с диска просто ничего не делает. */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
