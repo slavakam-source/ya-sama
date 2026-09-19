@@ -1,5 +1,8 @@
-/* Офлайн-режим: складываем всё в кэш при установке и отдаём из него. */
-var CACHE = 'ya-sama-v1';
+/* Офлайн-режим, версия 2.
+   Главная страница берётся из сети и только при её недоступности из кэша —
+   иначе неудачно закэшированная версия застревает навсегда.
+   Картинки наоборот: сначала кэш, они не меняются. */
+var CACHE = 'ya-sama-v2';
 var ASSETS = [
   "./",
   "index.html",
@@ -57,9 +60,10 @@ var ASSETS = [
 self.addEventListener('install', function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(function(c){
-    /* по одному, чтобы одна неудача не сорвала установку целиком */
     return Promise.all(ASSETS.map(function(u){
-      return c.add(new Request(u, {cache:'reload'})).catch(function(){});
+      return fetch(new Request(u, {cache:'reload'})).then(function(r){
+        if(r && r.ok) return c.put(u, r);   /* кладём только удачные ответы */
+      }).catch(function(){});
     }));
   }));
 });
@@ -71,19 +75,38 @@ self.addEventListener('activate', function(e){
 });
 
 self.addEventListener('fetch', function(e){
-  if(e.request.method!=='GET') return;
-  e.respondWith(
-    caches.match(e.request).then(function(hit){
-      if(hit) return hit;
-      return fetch(e.request).then(function(res){
-        if(res && res.status===200 && res.type==='basic'){
+  var req = e.request;
+  if(req.method!=='GET') return;
+
+  /* Страница: сначала сеть, кэш — запасной аэродром. */
+  if(req.mode==='navigate' || (req.headers.get('accept')||'').indexOf('text/html')>=0){
+    e.respondWith(
+      fetch(req).then(function(res){
+        if(res && res.ok){
           var copy=res.clone();
-          caches.open(CACHE).then(function(c){c.put(e.request, copy)});
+          caches.open(CACHE).then(function(c){c.put('index.html', copy)});
         }
         return res;
       }).catch(function(){
-        return caches.match('index.html');
-      });
+        return caches.match('index.html').then(function(hit){
+          return hit || caches.match('./');
+        });
+      })
+    );
+    return;
+  }
+
+  /* Всё остальное: сначала кэш. */
+  e.respondWith(
+    caches.match(req).then(function(hit){
+      if(hit) return hit;
+      return fetch(req).then(function(res){
+        if(res && res.ok && res.type==='basic'){
+          var copy=res.clone();
+          caches.open(CACHE).then(function(c){c.put(req, copy)});
+        }
+        return res;
+      }).catch(function(){ return hit; });
     })
   );
 });
