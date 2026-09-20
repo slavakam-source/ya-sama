@@ -128,6 +128,17 @@ body{
              0 5px 0 #4e1ea8,0 10px 20px rgba(123,63,228,.45);
 }
 .nav button:focus-visible,.btn:focus-visible{outline:3px solid var(--magenta);outline-offset:3px}
+.nav button{position:relative}
+.dot{
+  position:absolute;right:-4px;top:-4px;
+  min-width:20px;height:20px;padding:0 5px;border-radius:10px;
+  background:linear-gradient(180deg,#ff8095,#e03a5c);
+  border:2px solid #fff;box-shadow:0 2px 6px rgba(224,58,92,.5);
+  color:#fff;font-size:11px;font-weight:800;font-style:normal;
+  display:flex;align-items:center;justify-content:center;
+  animation:pend 1.6s ease-in-out infinite;
+}
+@keyframes pend{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 
 /* ── рабочая область ── */
 .stage{
@@ -427,8 +438,9 @@ body{
       <button data-go="shop" title="Магазин наград">🎁</button>
       <button data-go="wear" title="Гардероб">👗</button>
       <button data-go="awards" title="Достижения">🏆</button>
-      <button data-go="parent" title="Родителям">⚙️</button>
+      <button data-go="parent" title="Родителям">⚙️<i class="dot" id="pendDot" hidden></i></button>
       <button id="voiceBtn" title="Голос">🔊</button>
+      <button id="installBtn" title="Установить приложение" hidden>⬇️</button>
     </nav>
   </header>
 
@@ -750,8 +762,9 @@ var S={
   earned:Store.get('ys_earned',0),
   done:Store.get('ys_done',0),
   bought:Store.get('ys_bought',0),
-  tasks:Store.get('ys_tasks',null)||SEED_TASKS.map(function(x){return{title:x.t,value:x.v,icon:x.i,img:x.p,desc:x.d,status:'new'}}),
-  rewards:Store.get('ys_rewards',null)||SEED_REWARDS.map(function(x){return{title:x.t,value:x.v,icon:x.i,img:x.p,days:x.n}}),
+  /* Ничего не заводится само: и дела, и награды родитель добавляет вручную. */
+  tasks:Store.get('ys_tasks',null)||[],
+  rewards:Store.get('ys_rewards',null)||[],
   streak:Store.get('ys_streak',0),
   best:Store.get('ys_best',0),
   owned:Store.get('ys_owned',null)||['base'],
@@ -1003,6 +1016,7 @@ function pickPic(name){var k=lookup(name);return k?k[2]:''}
    Читает реплики синтезом речи, встроенным в систему. Если позже
    положить записи в папку audio (scene-home.mp3, task-bed.mp3 и т.д.),
    игра возьмёт их вместо синтеза. */
+var PIN=String(Store.get('ys_pin','1234'));
 var VOICE=Store.get('ys_voice',1), voiceReady=false, ruVoice=null, pending=null;
 var PITCH=Store.get('ys_pitch',1.7);   /* выше — звонче и по-детски */
 var RATE =Store.get('ys_rate',1.05);   /* чуть быстрее — звучит веселее */
@@ -1081,12 +1095,22 @@ function paintVoice(){
   b.setAttribute('title',VOICE?'Голос включён':'Голос выключен');
 }
 
+/* Сколько дел ждёт проверки — видно с любого экрана. */
+function paintPending(){
+  var dot=$('#pendDot');
+  if(!dot)return;
+  var n=S.tasks.filter(function(t){return t.status==='pending'}).length;
+  if(n&&!parentOn){dot.hidden=false;dot.textContent=n}
+  else dot.hidden=true;
+}
+
 function paintHeader(pop){
   $('#starCount').textContent=S.stars;
   var L=level();
   $('#lvlBadge').textContent=L;
   $('#rankName').textContent=RANKS[Math.min(L-1,RANKS.length-1)];
   $('#xpFill').style.width=Math.round((S.earned%STEP)/STEP*100)+'%';
+  paintPending();
   if(pop){var p=$('#purse');p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop')}
 }
 
@@ -1207,11 +1231,12 @@ function render(){
     body.querySelectorAll('[data-did]').forEach(function(b){
       b.onclick=function(){
         S.tasks[+b.getAttribute('data-did')].status='pending';
-        save();render();say('Отправила маме на проверку ⏳');
+        save();render();paintPending();say('Отправила маме на проверку ⏳');
       };
     });
     body.querySelectorAll('[data-ok]').forEach(function(b){
       b.onclick=function(){
+        if(!parentOn){say('Сначала войдите в режим родителя');return}
         var t=S.tasks[+b.getAttribute('data-ok')];
         t.status='completed';S.stars+=t.value;S.earned+=t.value;S.done++;
         save();burst(b);paintHeader(true);render();say('+'+t.value+' ⭐ засчитано!');
@@ -1387,18 +1412,22 @@ function render(){
         '<div><b>'+esc(t.title)+'</b><small>'+st+'</small></div>'+
         '<span class="tail">+'+t.value+' ⭐</span>'+
         '<button class="kill" data-delt="'+i+'" aria-label="Удалить">✕</button></div>';
-    }).join(''):'<p class="hint">Дел пока нет</p>';
+    }).join(''):'<p class="hint">Дел пока нет. Нажмите «Добавить дело» и выберите из готового списка или впишите своё.</p>';
     h+='<div class="divider"></div><div class="sub-title">Награды</div>';
     h+=S.rewards.length?S.rewards.map(function(r,i){
       return '<div class="line"><span class="ic">'+(r.icon||'🎁')+'</span>'+
         '<div><b>'+esc(r.title)+'</b><small>в магазине</small></div>'+
         '<span class="tail">'+r.value+' ⭐</span>'+
         '<button class="kill" data-delr="'+i+'" aria-label="Удалить">✕</button></div>';
-    }).join(''):'<p class="hint">Наград пока нет</p>';
+    }).join(''):'<p class="hint">Наград пока нет. Нажмите «Добавить награду» — в списке есть готовые, с картинками и условиями по дням.</p>';
     h+='<div class="divider"></div>'+
       '<button class="btn ghost" id="newDay">Начать новый день</button><div style="height:8px"></div>'+
+      '<button class="btn ghost" id="pinChange">Сменить PIN</button><div style="height:8px"></div>'+
       '<button class="btn coral" id="wipe">Сбросить всю игру</button><div style="height:10px"></div>'+
-      '<p class="hint">«Новый день» вернёт выполненные дела в список. Звёзды и награды останутся.</p>';
+      '<p class="hint">«Новый день» вернёт выполненные дела в список. Звёзды и награды останутся.</p>'+
+      '<div class="divider"></div>'+
+      '<button class="btn mint" id="parentOff">Выйти из режима родителя</button>'+
+      '<p class="hint" style="margin-top:8px">Пока режим включён, звёзды можно засчитывать без PIN. Выходите, отдавая устройство ребёнку.</p>';
     body.innerHTML=h;
     /* Настройка голоса */
     (function(){
@@ -1422,6 +1451,10 @@ function render(){
       $('#vTest').onclick=function(){voiceReady=true;tts('Привет! Я Ксюша, и я сегодня всё сделаю сама!')};
     })();
 
+    $('#parentOff').onclick=function(){
+      parentOn=false;paintPending();go('home');say('Режим родителя выключен');
+    };
+    $('#pinChange').onclick=pinSheet;
     $('#addTask').onclick=function(){editSheet('task')};
     $('#picRoom').onclick=function(){askPicture('room')};
     $('#picFace').onclick=function(){askPicture('face')};
@@ -1472,6 +1505,7 @@ function taskSheet(i){
     t.status='pending';save();closeSheet();render();say('Отправила маме на проверку ⏳');
   };
   if($('#dOk'))$('#dOk').onclick=function(){
+    if(!parentOn){say('Сначала войдите в режим родителя');return}
     t.status='completed';S.stars+=t.value;S.earned+=t.value;S.done++;
     save();closeSheet();paintHeader(true);render();say('+'+t.value+' ⭐ засчитано!');
   };
@@ -1484,11 +1518,11 @@ $('#sheet').onclick=function(e){if(e.target.id==='sheet')closeSheet()};
 function askPin(){
   openSheet('<h2>🔒 Родительский режим</h2>'+
     '<p class="hint">Введите PIN, чтобы добавлять дела, засчитывать звёзды и настраивать награды.</p>'+
-    '<input type="password" inputmode="numeric" id="pin" placeholder="PIN по умолчанию 1234" autocomplete="off">'+
+    '<input type="password" inputmode="numeric" id="pin" placeholder="'+(PIN==='1234'?'PIN по умолчанию 1234':'Введите PIN')+'" autocomplete="off">'+
     '<button class="btn" id="pinOk">Войти</button>'+
     '<button class="btn ghost" id="pinNo">Отмена</button>');
   function enter(){
-    if($('#pin').value.trim()!=='1234'){say('PIN не подошёл');return}
+    if($('#pin').value.trim()!==PIN){say('PIN не подошёл');return}
     parentOn=true;closeSheet();go('parent');say('Режим родителя включён');
   }
   $('#pinOk').onclick=enter;
@@ -1497,15 +1531,38 @@ function askPin(){
   setTimeout(function(){$('#pin').focus()},60);
 }
 
+function pinSheet(){
+  openSheet('<h2>🔒 Смена PIN</h2>'+
+    '<p class="hint">Четыре цифры. Понадобится, чтобы входить в режим родителя.</p>'+
+    '<label>Текущий PIN</label>'+
+    '<input type="password" inputmode="numeric" id="p0" autocomplete="off">'+
+    '<label>Новый PIN</label>'+
+    '<input type="password" inputmode="numeric" id="p1" autocomplete="off">'+
+    '<label>Новый PIN ещё раз</label>'+
+    '<input type="password" inputmode="numeric" id="p2" autocomplete="off">'+
+    '<button class="btn mint" id="pSave">Сохранить</button>'+
+    '<button class="btn ghost" id="pNo">Отмена</button>');
+  $('#pNo').onclick=closeSheet;
+  $('#pSave').onclick=function(){
+    var cur=$('#p0').value.trim(), a=$('#p1').value.trim(), b=$('#p2').value.trim();
+    if(cur!==PIN){say('Текущий PIN не подошёл');return}
+    if(!/^\d{4}$/.test(a)){say('Новый PIN — ровно четыре цифры');return}
+    if(a!==b){say('Новые PIN не совпали');return}
+    PIN=a;Store.set('ys_pin',PIN);closeSheet();say('PIN изменён');
+  };
+  setTimeout(function(){$('#p0').focus()},60);
+}
+
 function editSheet(kind){
   var isTask=kind==='task';
   var cat=isTask?CAT_TASKS:CAT_REWARDS;
-  /* Уже добавленное в список не показываем, чтобы не плодить дубли. */
+  /* Показываем весь каталог. Уже добавленное помечаем, но не убираем —
+     одно и то же дело может понадобиться дважды. */
   var have={};
   (isTask?S.tasks:S.rewards).forEach(function(x){have[x.title]=1});
   var opts='<option value="">— выберите из готовых —</option>';
   cat.forEach(function(c,i){
-    if(!have[c.t])opts+='<option value="'+i+'">'+c.i+'  '+esc(c.t)+'</option>';
+    opts+='<option value="'+i+'">'+c.i+'  '+esc(c.t)+(have[c.t]?'  (уже добавлено)':'')+'</option>';
   });
   opts+='<option value="own">✏️  Своё '+(isTask?'дело':'награда')+'…</option>';
 
@@ -1533,8 +1590,14 @@ function editSheet(kind){
   $('#fPick').onchange=function(){
     var val=this.value;
     if(val==='own'||val===''){
+      /* Сняли выбор — очищаем всё, что подставилось из каталога. */
       chosen=null;
-      if(val==='own'){$('#fTitle').value='';$('#fImg').value='';$('#fTitle').focus()}
+      $('#fTitle').value='';
+      $('#fImg').value='';
+      $('#fVal').value=isTask?20:200;
+      if(isTask&&$('#fDesc'))$('#fDesc').value='';
+      if(!isTask&&$('#fDays'))$('#fDays').value=0;
+      if(val==='own')$('#fTitle').focus();
       return;
     }
     chosen=cat[+val];
@@ -1611,6 +1674,32 @@ $('#sceneSay').style.cursor='pointer';
 applyPics();
 paintVoice();
 go('home');
+
+/* Установка приложения на Android и Windows.
+   Браузер сам решает, когда предложить — ловим это событие и показываем кнопку.
+   На iPhone события нет: там ставят вручную через «Поделиться» → «На экран Домой». */
+var installEvent=null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  installEvent=e;
+  var b=$('#installBtn');
+  if(b)b.hidden=false;
+});
+if($('#installBtn')){
+  $('#installBtn').onclick=function(){
+    if(!installEvent){say('Браузер пока не предлагает установку');return}
+    installEvent.prompt();
+    installEvent.userChoice.then(function(r){
+      installEvent=null;
+      $('#installBtn').hidden=true;
+      say(r&&r.outcome==='accepted'?'Игра установлена!':'Установку можно запустить позже из меню браузера');
+    });
+  };
+}
+window.addEventListener('appinstalled', function(){
+  installEvent=null;
+  var b=$('#installBtn'); if(b)b.hidden=true;
+});
 
 /* Офлайн-режим. Работает только по https — на GitHub Pages включится сам,
    при открытии файла с диска просто ничего не делает. */
