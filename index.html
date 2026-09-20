@@ -759,6 +759,37 @@ var CAT_REWARDS=[
   {t:'Аквапарк',          v:800,i:'🏊', n:7,p:'img/reward-aquapark.jpg'}
 ];
 
+/* Всё, что родитель когда-либо вписал сам, запоминается и остаётся
+   в выпадающем списке — даже если дело потом удалили. */
+var MY_TASKS=Store.get('ys_my_tasks',null)||[];
+var MY_REWARDS=Store.get('ys_my_rewards',null)||[];
+
+function myList(isTask){
+  var cat=isTask?CAT_TASKS:CAT_REWARDS;
+  var known={},seen={},out=[];
+  cat.forEach(function(c){known[c.t]=1});
+  function add(o){
+    if(!o||!o.t||known[o.t]||seen[o.t])return;
+    seen[o.t]=1;out.push(o);
+  }
+  (isTask?MY_TASKS:MY_REWARDS).forEach(add);
+  /* Дела из старых сохранений в памяти не значатся — подхватываем их из игры. */
+  (isTask?S.tasks:S.rewards).forEach(function(x){
+    add({t:x.title,v:x.value,i:x.icon,p:x.img,d:x.desc,n:x.days});
+  });
+  return out;
+}
+
+function remember(isTask,item){
+  var cat=isTask?CAT_TASKS:CAT_REWARDS;
+  for(var i=0;i<cat.length;i++)if(cat[i].t===item.title)return;
+  var store=isTask?MY_TASKS:MY_REWARDS;
+  for(var j=0;j<store.length;j++)if(store[j].t===item.title){store.splice(j,1);break}
+  store.unshift({t:item.title,v:item.value,i:item.icon,p:item.img,d:item.desc,n:item.days});
+  if(store.length>40)store.length=40;
+  Store.set(isTask?'ys_my_tasks':'ys_my_rewards',store);
+}
+
 var RANKS=['Новичок','Помощница','Умница','Хозяюшка','Мастер','Легенда'];
 var STEP=500;
 
@@ -1618,20 +1649,27 @@ function pinSheet(){
 function editSheet(kind){
   var isTask=kind==='task';
   var cat=isTask?CAT_TASKS:CAT_REWARDS;
-  /* Показываем весь каталог. Уже добавленное помечаем, но не убираем —
+  var mine=myList(isTask);
+  /* Показываем весь каталог и всё, что родитель добавлял сам.
+     Уже добавленное помечаем, но не убираем —
      одно и то же дело может понадобиться дважды. */
   var have={};
   (isTask?S.tasks:S.rewards).forEach(function(x){have[x.title]=1});
-  var opts='<option value="">— выберите из готовых —</option>';
-  cat.forEach(function(c,i){
-    opts+='<option value="'+i+'">'+c.i+'  '+esc(c.t)+(have[c.t]?'  (уже добавлено)':'')+'</option>';
-  });
-  opts+='<option value="own">✏️  Своё '+(isTask?'дело':'награда')+'…</option>';
+  function opt(pfx,c,i){
+    return '<option value="'+pfx+i+'">'+(c.i||(isTask?'🎯':'🎁'))+'  '+esc(c.t)+
+      (have[c.t]?'  (уже добавлено)':'')+'</option>';
+  }
+  var opts='<option value="">— выберите из списка —</option>'+
+    '<optgroup label="Готовые — с картинками">'+
+    cat.map(function(c,i){return opt('c',c,i)}).join('')+'</optgroup>';
+  if(mine.length)opts+='<optgroup label="'+(isTask?'Ваши дела':'Ваши награды')+'">'+
+    mine.map(function(c,i){return opt('m',c,i)}).join('')+'</optgroup>';
+  opts+='<option value="own">✏️  '+(isTask?'Своё дело':'Своя награда')+'…</option>';
 
   openSheet('<h2>'+(isTask?'📋 Новое дело':'🎁 Новая награда')+'</h2>'+
-    '<label>Готовые '+(isTask?'дела':'награды')+' — с картинками</label>'+
+    '<label>'+(isTask?'Выберите дело':'Выберите награду')+'</label>'+
     '<select id="fPick">'+opts+'</select>'+
-    '<p class="hint">Выберите из списка — название, значок и картинка подставятся сами. Или «Своё», чтобы вписать вручную.</p>'+
+    '<p class="hint">Выберите из списка — название, значок и картинка подставятся сами. Всё, что вы вписали вручную, запоминается и в следующий раз будет в списке.</p>'+
     '<label>Название</label>'+
     '<input id="fTitle" placeholder="'+(isTask?'Например: убрать со стола':'Например: поход в кино')+'">'+
     '<label>'+(isTask?'Сколько звёзд за выполнение':'Цена в звёздах')+'</label>'+
@@ -1662,7 +1700,8 @@ function editSheet(kind){
       if(val==='own')$('#fTitle').focus();
       return;
     }
-    chosen=cat[+val];
+    chosen=val.charAt(0)==='m'?mine[+val.slice(1)]:cat[+val.slice(1)];
+    if(!chosen)return;
     $('#fTitle').value=chosen.t;
     $('#fVal').value=chosen.v;
     $('#fImg').value=chosen.p;
@@ -1680,6 +1719,7 @@ function editSheet(kind){
     else if(img&&img.length<=4)item.icon=img;
     if(isTask){item.status='new';S.tasks.push(item)}
     else{item.days=Math.max(0,parseInt($('#fDays').value,10)||0);S.rewards.push(item)}
+    remember(isTask,item);
     save();closeSheet();render();say(isTask?'Дело добавлено':'Награда в магазине');
   };
   setTimeout(function(){$('#fTitle').focus()},60);
