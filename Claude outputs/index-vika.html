@@ -422,7 +422,7 @@ body{
         <div class="acc" id="accBadge" hidden></div>
       </div>
       <div class="hero-meta">
-        <div class="hero-name">Ксюша</div>
+        <div class="hero-name">Вика</div>
         <div class="hero-rank" id="rankName">Новичок</div>
         <div class="xp"><i id="xpFill" style="width:0%"></i></div>
       </div>
@@ -1453,12 +1453,12 @@ function render(){
         }).join('');
         sel.onchange=function(){
           VNAME=this.value;Store.set('ys_vname',VNAME);pickVoice();
-          voiceReady=true;tts('Привет! Я Ксюша, и я всё сделаю сама!');
+          voiceReady=true;tts('Привет! Я Вика, и я всё сделаю сама!');
         };
       }
       $('#vPitch').oninput=function(){PITCH=parseFloat(this.value);Store.set('ys_pitch',PITCH)};
       $('#vRate').oninput=function(){RATE=parseFloat(this.value);Store.set('ys_rate',RATE)};
-      $('#vTest').onclick=function(){voiceReady=true;tts('Привет! Я Ксюша, и я сегодня всё сделаю сама!')};
+      $('#vTest').onclick=function(){voiceReady=true;tts('Привет! Я Вика, и я сегодня всё сделаю сама!')};
     })();
 
     $('#parentOff').onclick=function(){
