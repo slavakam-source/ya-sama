@@ -311,6 +311,11 @@ body{
 .line .tail{margin-left:auto;font-size:15px;font-weight:800;color:var(--gold-dk);white-space:nowrap}
 .kill{border:none;background:#ffe9ee;color:var(--coral-dk);margin-left:8px;
   width:34px;height:34px;border-radius:12px;font-size:17px;cursor:pointer;font-weight:800;flex:0 0 auto}
+.okb{border:none;background:#d6f7ec;color:#0b7a5a;margin-left:8px;
+  width:34px;height:34px;border-radius:12px;font-size:17px;cursor:pointer;font-weight:800;flex:0 0 auto}
+.backb{border:none;background:#efe6ff;color:#5b2bb0;margin-left:8px;
+  width:34px;height:34px;border-radius:12px;font-size:16px;cursor:pointer;font-weight:800;flex:0 0 auto}
+.line.wait{border-color:#ffd9a3;box-shadow:0 4px 0 #ffeccd}
 .divider{height:2px;background:var(--line);border-radius:2px;margin:14px 0}
 
 .sheet{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
@@ -1392,11 +1397,21 @@ function render(){
   }
 
   if(page==='parent'){
-    note.textContent='PIN 1234';
+    note.textContent='Родительский режим';
     var pend=S.tasks.filter(function(t){return t.status==='pending'}).length;
     var allNow=S.tasks.length>0&&S.tasks.every(function(t){return t.status==='completed'});
+    var waiting=S.tasks.map(function(t,i){return {t:t,i:i}})
+                       .filter(function(o){return o.t.status==='pending'});
     var h='<div class="goal calm"><h3>'+(pend?deals(pend):'Всё проверено')+'</h3>'+
-      '<p>'+(pend?'Откройте «Задания» и засчитайте звёзды':'Новые заявки появятся здесь')+'</p></div>'+
+      '<p>'+(pend?'Нажмите ✓, если дело правда сделано, или ↩, чтобы вернуть его в список'
+                 :'Новые заявки появятся здесь')+'</p></div>'+
+      (waiting.length?('<div class="sub-title">Ждут проверки</div>'+waiting.map(function(o){
+        return '<div class="line wait"><span class="ic">'+(o.t.icon||'🎯')+'</span>'+
+          '<div><b>'+esc(o.t.title)+'</b><small>ребёнок отметил как сделанное</small></div>'+
+          '<span class="tail">+'+o.t.value+' ⭐</span>'+
+          '<button class="okb" data-pok="'+o.i+'" aria-label="Засчитать">✓</button>'+
+          '<button class="backb" data-pno="'+o.i+'" aria-label="Вернуть в список">↩</button></div>';
+      }).join('')+'<div class="divider"></div>'):'')+
       '<div class="goal'+(allNow?'':' calm')+'"><h3>Серия: '+days(S.streak)+'</h3>'+
       '<p>'+(allNow?'Все дела закрыты — нажмите «Начать новый день», и серия вырастет'
                    :'Серия растёт только за день, в котором закрыты все дела. Рекорд: '+days(S.best))+'</p></div>'+
@@ -1418,9 +1433,14 @@ function render(){
       '<div class="sub-title">Дела</div>';
     h+=S.tasks.length?S.tasks.map(function(t,i){
       var st=t.status==='completed'?'выполнено':(t.status==='pending'?'на проверке':'активно');
-      return '<div class="line"><span class="ic">'+(t.icon||'🎯')+'</span>'+
+      var extra='';
+      if(t.status==='pending')
+        extra='<button class="okb" data-pok="'+i+'" aria-label="Засчитать">✓</button>';
+      else if(t.status==='completed')
+        extra='<button class="backb" data-undo="'+i+'" aria-label="Снять зачёт">↩</button>';
+      return '<div class="line'+(t.status==='pending'?' wait':'')+'"><span class="ic">'+(t.icon||'🎯')+'</span>'+
         '<div><b>'+esc(t.title)+'</b><small>'+st+'</small></div>'+
-        '<span class="tail">+'+t.value+' ⭐</span>'+
+        '<span class="tail">+'+t.value+' ⭐</span>'+extra+
         '<button class="kill" data-delt="'+i+'" aria-label="Удалить">✕</button></div>';
     }).join(''):'<p class="hint">Дел пока нет. Нажмите «Добавить дело» и выберите из готового списка или впишите своё.</p>';
     h+='<div class="divider"></div><div class="sub-title">Награды</div>';
@@ -1473,8 +1493,40 @@ function render(){
       applyPics();render();say('Вернул рисованную комнату');
     };
     $('#addReward').onclick=function(){editSheet('reward')};
+    body.querySelectorAll('[data-pok]').forEach(function(b){
+      b.onclick=function(){
+        if(!parentOn){say('Сначала войдите в режим родителя');return}
+        var t=S.tasks[+b.getAttribute('data-pok')];
+        if(!t||t.status!=='pending')return;
+        t.status='completed';S.stars+=t.value;S.earned+=t.value;S.done++;
+        save();burst(b);paintHeader(true);render();paintPending();
+        say('+'+t.value+' ⭐ засчитано!');
+      };
+    });
+    body.querySelectorAll('[data-pno]').forEach(function(b){
+      b.onclick=function(){
+        if(!parentOn){say('Сначала войдите в режим родителя');return}
+        var t=S.tasks[+b.getAttribute('data-pno')];
+        if(!t)return;
+        t.status='new';save();render();paintPending();
+        say('Дело вернулось в список');
+      };
+    });
+    body.querySelectorAll('[data-undo]').forEach(function(b){
+      b.onclick=function(){
+        if(!parentOn){say('Сначала войдите в режим родителя');return}
+        var t=S.tasks[+b.getAttribute('data-undo')];
+        if(!t||t.status!=='completed')return;
+        t.status='new';
+        S.stars=Math.max(0,S.stars-t.value);
+        S.earned=Math.max(0,S.earned-t.value);
+        S.done=Math.max(0,S.done-1);
+        save();paintHeader(true);render();paintPending();
+        say('Зачёт отменён, дело снова в списке');
+      };
+    });
     body.querySelectorAll('[data-delt]').forEach(function(b){
-      b.onclick=function(){S.tasks.splice(+b.getAttribute('data-delt'),1);save();render()};
+      b.onclick=function(){S.tasks.splice(+b.getAttribute('data-delt'),1);save();render();paintPending()};
     });
     body.querySelectorAll('[data-delr]').forEach(function(b){
       b.onclick=function(){S.rewards.splice(+b.getAttribute('data-delr'),1);save();render()};
