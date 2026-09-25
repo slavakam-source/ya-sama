@@ -648,18 +648,84 @@ body{
 
   <div class="sheet" id="sheet"><div class="sheet-box" id="sheetBox"></div></div>
   <input type="file" id="filePick" class="pick" accept="image/*">
+  <input type="file" id="savePick" class="pick">
   <div class="toast" id="toast"></div>
 </div>
 </div>
 
 <script>
 var Store=(function(){
-  var mem={},ok=true;
+  var mem={},ok=true,warned=false;
   try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){ok=false}
+  /* Запись не прошла (память переполнена) — раньше это терялось молча.
+     Теперь значение живёт в памяти до перезагрузки, а родитель получает предупреждение. */
+  function fail(){
+    if(warned)return;warned=true;
+    setTimeout(function(){if(window.say)say('Память браузера переполнена — сохраните копию в родительском режиме')},300);
+  }
+  function mine(k){return k&&k.indexOf('ys_')===0}
   return{
-    get:function(k,d){try{var v=ok?localStorage.getItem(k):mem[k];return v==null?d:JSON.parse(v)}catch(e){return d}},
-    set:function(k,v){var s=JSON.stringify(v);if(ok){try{localStorage.setItem(k,s)}catch(e){mem[k]=s}}else{mem[k]=s}},
+    get:function(k,d){try{var v=(k in mem)?mem[k]:(ok?localStorage.getItem(k):null);return v==null?d:JSON.parse(v)}catch(e){return d}},
+    set:function(k,v){var s=JSON.stringify(v);
+      if(ok){try{localStorage.setItem(k,s);delete mem[k];return true}catch(e){mem[k]=s;fail();return false}}
+      mem[k]=s;return false},
+    remove:function(k){delete mem[k];if(ok){try{localStorage.removeItem(k)}catch(e){}}},
+    /* Все ключи игры как есть — для файла резервной копии. */
+    dump:function(){
+      var o={},i,k;
+      if(ok){try{for(i=0;i<localStorage.length;i++){k=localStorage.key(i);if(mine(k))o[k]=localStorage.getItem(k)}}catch(e){}}
+      for(k in mem)if(mine(k))o[k]=mem[k];
+      return o;
+    },
+    /* Заменить ключи игры содержимым копии; keep — что не трогать (настройки этого устройства). */
+    restore:function(o,keep){
+      var old=this.dump(),k;
+      for(k in old)if(keep.indexOf(k)<0)this.remove(k);
+      for(k in o)if(mine(k)&&keep.indexOf(k)<0&&typeof o[k]==='string'){
+        if(ok){try{localStorage.setItem(k,o[k])}catch(e){mem[k]=o[k];fail()}}else mem[k]=o[k];
+      }
+    },
     wipe:function(){if(ok){try{localStorage.clear()}catch(e){}}mem={}}
+  };
+})();
+
+/* Свои картинки (фон комнаты, аватар) — в IndexedDB, а не в localStorage.
+   У localStorage в Safari около 5 МБ на всё, и пара фото в base64 его выбирает.
+   У IndexedDB квота в сотни мегабайт. Если IndexedDB недоступна — откат на localStorage. */
+var Pics=(function(){
+  var dbp=null;
+  function db(){
+    if(dbp)return dbp;
+    dbp=new Promise(function(res,rej){
+      if(!window.indexedDB){rej(new Error('no idb'));return}
+      var r;
+      try{r=indexedDB.open('ya-sama',1)}catch(e){rej(e);return}
+      r.onupgradeneeded=function(){r.result.createObjectStore('pics')};
+      r.onsuccess=function(){res(r.result)};
+      r.onerror=function(){rej(r.error)};
+    });
+    return dbp;
+  }
+  function tx(mode,fn){
+    return db().then(function(d){
+      return new Promise(function(res,rej){
+        var t=d.transaction('pics',mode),req=fn(t.objectStore('pics'));
+        t.oncomplete=function(){res(req?req.result:undefined)};
+        t.onerror=t.onabort=function(){rej(t.error)};
+      });
+    });
+  }
+  return{
+    get:function(k){
+      return tx('readonly',function(st){return st.get(k)})
+        .catch(function(){return Store.get('ys_'+k,'')});
+    },
+    set:function(k,v){
+      return tx('readwrite',function(st){return v?st.put(v,k):st.delete(k)})
+        .then(function(){Store.remove('ys_'+k);return true})
+        .catch(function(){return Store.set('ys_'+k,v||'')});
+    },
+    wipe:function(){return tx('readwrite',function(st){return st.clear()}).catch(function(){})}
   };
 })();
 
@@ -942,11 +1008,12 @@ function askPicture(kind){
     var f=inp.files&&inp.files[0];
     if(!f)return;
     shrink(f,kind==='room'?1200:320,function(data){
-      try{
-        if(kind==='room'){roomPic=data;Store.set('ys_room',data)}
-        else{facePic=data;Store.set('ys_face',data)}
-        applyPics();render();say(kind==='room'?'Картинка комнаты обновлена':'Аватар обновлён');
-      }catch(e){say('Картинка слишком большая — возьми файл поменьше')}
+      if(kind==='room')roomPic=data;else facePic=data;
+      applyPics();render();
+      Pics.set(kind,data).then(function(ok){
+        say(!ok?'Картинка показана, но не сохранилась: память переполнена'
+          :(kind==='room'?'Картинка комнаты обновлена':'Аватар обновлён'));
+      });
     });
   };
   inp.click();
@@ -1460,7 +1527,7 @@ function render(){
       '<button class="btn ghost" id="picRoom">Фон комнаты</button>'+
       '<button class="btn ghost" id="picFace">Аватар</button></div>'+
       (roomPic||facePic?'<button class="btn coral" id="picClear" style="margin-bottom:8px">Вернуть рисованную комнату</button>':'')+
-      '<p class="hint" style="margin-bottom:14px">Подойдёт любая картинка из галереи: фото, рисунок или изображение из нейросети. Она сохранится на этом устройстве.</p>'+
+      '<p class="hint" style="margin-bottom:14px">Подойдёт любая картинка из галереи: фото, рисунок или изображение из нейросети. Она сохранится на этом устройстве и попадёт в резервную копию.</p>'+
       '<div class="sub-title">Дела</div>';
     h+=S.tasks.length?S.tasks.map(function(t,i){
       var st=t.status==='completed'?'выполнено':(t.status==='pending'?'на проверке':'активно');
@@ -1481,6 +1548,12 @@ function render(){
         '<span class="tail">'+r.value+' ⭐</span>'+
         '<button class="kill" data-delr="'+i+'" aria-label="Удалить">✕</button></div>';
     }).join(''):'<p class="hint">Наград пока нет. Нажмите «Добавить награду» — в списке есть готовые, с картинками и условиями по дням.</p>';
+    h+='<div class="divider"></div><div class="sub-title">Резервная копия</div>'+
+      '<div class="grid" style="margin-bottom:8px">'+
+      '<button class="btn ghost" id="saveOut">Сохранить копию</button>'+
+      '<button class="btn ghost" id="saveIn">Восстановить</button></div>'+
+      '<p class="hint" id="backupInfo" style="margin-bottom:6px">'+backupNote()+'</p>'+
+      '<p class="hint" id="persistInfo">'+persistNote()+'</p>';
     h+='<div class="divider"></div>'+
       '<button class="btn ghost" id="newDay">Начать новый день</button><div style="height:8px"></div>'+
       '<button class="btn ghost" id="pinChange">Сменить PIN</button><div style="height:8px"></div>'+
@@ -1516,11 +1589,13 @@ function render(){
       parentOn=false;paintPending();go('home');say('Режим родителя выключен');
     };
     $('#pinChange').onclick=pinSheet;
+    $('#saveOut').onclick=exportSave;
+    $('#saveIn').onclick=importSave;
     $('#addTask').onclick=function(){editSheet('task')};
     $('#picRoom').onclick=function(){askPicture('room')};
     $('#picFace').onclick=function(){askPicture('face')};
     if($('#picClear'))$('#picClear').onclick=function(){
-      roomPic='';facePic='';Store.set('ys_room','');Store.set('ys_face','');
+      roomPic='';facePic='';Pics.set('room','');Pics.set('face','');
       applyPics();render();say('Вернул рисованную комнату');
     };
     $('#addReward').onclick=function(){editSheet('reward')};
@@ -1748,7 +1823,7 @@ function confirmSheet(){
     '<button class="btn coral" id="cYes">Да, сбросить всё</button>'+
     '<button class="btn ghost" id="cNo">Оставить как есть</button>');
   $('#cNo').onclick=closeSheet;
-  $('#cYes').onclick=function(){Store.wipe();location.reload()};
+  $('#cYes').onclick=function(){Store.wipe();Pics.wipe().then(function(){location.reload()})};
 }
 
 document.querySelectorAll('.nav button').forEach(function(b){
@@ -1772,6 +1847,124 @@ $('#voiceBtn').onclick=function(){
 /* Нажатие на реплику героини — повторить её вслух. */
 $('#sceneSay').onclick=function(){speak(SCENE[page][1],'scene-'+page)};
 $('#sceneSay').style.cursor='pointer';
+
+/* ---------- Резервная копия прогресса ----------
+   Файл ya-sama-save-ДАТА.json: все звёзды, дела, награды, гардероб, PIN и свои картинки.
+   Защищает от «Очистить данные сайта», переустановки браузера, смены устройства.
+   Настройки голоса не переносятся — они свои у каждого устройства. */
+var DEVICE_KEYS=['ys_vname','ys_pitch','ys_rate','ys_voice','ys_last_backup'];
+var IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+
+function backupNote(){
+  var d=Store.get('ys_last_backup','');
+  if(!d)return 'Копия ещё не сохранялась. Сохраните её — это единственная защита от очистки данных браузера. Этим же файлом прогресс переносится на другое устройство.';
+  var dt=new Date(d),n=Math.floor((Date.now()-dt)/864e5);
+  return 'Последняя копия: '+dt.toLocaleDateString('ru-RU')+(n>=7?' — пора сохранить свежую.':'.');
+}
+
+function exportSave(){
+  var data=Store.dump();
+  DEVICE_KEYS.forEach(function(k){delete data[k]});
+  delete data.ys_room;delete data.ys_face;
+  var obj={app:'ya-sama',ver:1,date:new Date().toISOString(),data:data,pics:{room:roomPic||'',face:facePic||''}};
+  var name='ya-sama-save-'+obj.date.slice(0,10)+'.json';
+  var blob=new Blob([JSON.stringify(obj)],{type:'application/json'});
+  function done(){
+    Store.set('ys_last_backup',obj.date);
+    var el=$('#backupInfo');if(el)el.textContent=backupNote();
+  }
+  function download(){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);
+    done();say('Копия скачана: '+name);
+  }
+  /* На iPhone и iPad — через «Поделиться»: там есть «Сохранить в Файлы»,
+     и это работает даже в приложении с экрана «Домой». */
+  var file=null;
+  try{file=new File([blob],name,{type:'application/json'})}catch(e){}
+  if(IS_IOS&&file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file]}).then(function(){done();say('Копия сохранена')})
+      .catch(function(e){if(e&&e.name==='AbortError')return;download()});
+    return;
+  }
+  download();
+}
+
+function importSave(){
+  var inp=$('#savePick');
+  inp.value='';
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0];
+    if(!f)return;
+    var fr=new FileReader();
+    fr.onload=function(){
+      var obj;
+      try{obj=JSON.parse(fr.result)}catch(e){obj=null}
+      if(!obj||obj.app!=='ya-sama'||!obj.data||typeof obj.data!=='object'){
+        say('Это не файл копии игры');return;
+      }
+      var stars=0,tasks=0;
+      try{stars=JSON.parse(obj.data.ys_stars||'0')}catch(e){}
+      try{tasks=(JSON.parse(obj.data.ys_tasks||'[]')||[]).length}catch(e){}
+      var when=obj.date?new Date(obj.date).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'неизвестно когда';
+      openSheet('<h2>📦 Восстановить копию?</h2>'+
+        '<p class="hint" style="margin-bottom:12px">Копия от '+esc(when)+': '+stars+' ⭐, дел — '+tasks+'. '+
+        'Текущий прогресс на этом устройстве заменится содержимым копии.</p>'+
+        '<button class="btn mint" id="rYes">Восстановить</button>'+
+        '<button class="btn ghost" id="rNo">Отмена</button>');
+      $('#rNo').onclick=closeSheet;
+      $('#rYes').onclick=function(){
+        Store.restore(obj.data,DEVICE_KEYS);
+        var p=obj.pics||{};
+        Promise.all([Pics.set('room',p.room||''),Pics.set('face',p.face||'')]).then(function(){
+          say('Копия восстановлена');
+          setTimeout(function(){location.reload()},900);
+        });
+      };
+    };
+    fr.onerror=function(){say('Не получилось прочитать файл')};
+    fr.readAsText(f);
+  };
+  inp.click();
+}
+
+/* ---------- Постоянное хранилище ----------
+   Просим браузер не считать данные игры кэшем и не вычищать их при нехватке места. */
+var persisted=null;
+var STANDALONE=!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
+function persistNote(){
+  var s=persisted===true?'Хранилище: постоянное ✓ — браузер не удалит данные сам.'
+       :persisted===false?'Хранилище: обычное — браузер может очистить данные при нехватке места.'
+       :'';
+  if(!STANDALONE)s+=(s?' ':'')+(IS_IOS
+    ?'Поставьте игру на экран «Домой» (Поделиться → «На экран Домой») — так данные живут дольше, недельная чистка Safari их не трогает.'
+    :'Установите игру как приложение — так данные живут дольше.');
+  return s;
+}
+function askPersist(){
+  if(!(navigator.storage&&navigator.storage.persist))return;
+  var chk=navigator.storage.persisted?navigator.storage.persisted():Promise.resolve(false);
+  chk.then(function(p){return p||navigator.storage.persist()})
+    .then(function(p){persisted=!!p;var el=$('#persistInfo');if(el)el.textContent=persistNote()})
+    .catch(function(){});
+}
+askPersist();
+/* Safari охотнее выдаёт разрешение после действия пользователя — спросим ещё раз при первом касании. */
+document.addEventListener('click',function once(){document.removeEventListener('click',once,true);if(persisted!==true)askPersist()},true);
+
+/* ---------- Картинки: переезд из localStorage в IndexedDB ---------- */
+(function(){
+  var oldRoom=roomPic,oldFace=facePic;
+  Promise.all([Pics.get('room'),Pics.get('face')]).then(function(r){
+    roomPic=r[0]||oldRoom||'';facePic=r[1]||oldFace||'';
+    if(oldRoom&&!r[0])Pics.set('room',oldRoom);
+    if(oldFace&&!r[1])Pics.set('face',oldFace);
+    applyPics();
+    if(page==='parent')render();
+  });
+})();
 
 applyPics();
 paintVoice();
