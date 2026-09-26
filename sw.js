@@ -2,7 +2,7 @@
    Главная страница берётся из сети и только при её недоступности из кэша —
    иначе неудачно закэшированная версия застревает навсегда.
    Картинки наоборот: сначала кэш, они не меняются. */
-var CACHE = 'ya-sama-v3';
+var CACHE = 'ya-sama-v4';
 var ASSETS = [
   "./",
   "index.html",
@@ -44,6 +44,10 @@ var ASSETS = [
   "img/task-backpack.jpg",
   "img/task-bed.jpg",
   "img/task-clothes.jpg",
+  "img/task-cat.jpg",
+  "img/task-cook.jpg",
+  "img/task-dog.jpg",
+  "img/task-floor.jpg",
   "img/task-dishes.jpg",
   "img/task-exercise.jpg",
   "img/task-homework.jpg",
